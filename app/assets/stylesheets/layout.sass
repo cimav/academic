@@ -1,0 +1,276 @@
+#top-bar
+  position: fixed
+  top: 0px
+  left: 0px
+  z-index: 999999
+  background: transparent url(/assets/bg-bar.png) repeat-x
+  height: 31px
+  width: 100%
+  color: #fff
+  #logo
+    position: absolute
+    top: 2px
+    left: 10px
+  #nav-select
+    color: #fff
+    font-size: 18px
+    font-weight: bold
+    position: absolute
+    padding-top: 8px
+    left: 46px
+    width: 256px
+    height: 22px
+    text-shadow: #113f7d 0px -1px 1px
+  #account
+    color: #fff
+    a
+      color: #fff
+    text-decoration: none 
+    float: right
+    height: 31px
+    background: transparent url(/assets/sep-account.png) no-repeat
+    padding: 7px 0px 0px 20px
+    margin-right: 20px
+
+#nav-menu
+  position: absolute
+  top: 30px
+  left: 0px
+  width: 300px
+  background: transparent url(/assets/bg-white-trans.png)
+  border-right: 1px solid $line-color
+  border-bottom: 1px solid $line-color
+  border-left: 1px solid $line-color
+  z-index: 99999
+  display: none
+  +shadow(8px, 1px, 1px, #dadada)
+  .nav
+    color: #000
+    a
+      display: block
+      width: 270px
+      color: #000
+      font-weight: bold
+      text-decoration: none
+    li
+      border-bottom: 1px solid $line-color
+      &.op
+        a
+          padding: 10px 10px 10px 20px
+          text-shadow: #fff 0px 1px 1px
+        &:hover
+          background-color: $hover-color
+      &.op-title
+        color: #688db3
+        text-shadow: #fff 0px 1px 1px
+
+#flash-notice
+  z-index: 8888
+  display: none
+  width: 400px
+  font-weight: bold
+  position: absolute
+  bottom: 0px
+  right: 20px
+  height: 20px
+  padding: 5px 10px
+
+#main
+  background: #fff
+  #work-area
+    padding: 50px 30px
+
+.side-panel
+  float: left
+  width: 300px
+  position: fixed
+  bottom: 0px
+  top: 31px
+  background-color: #fff
+  border-left: 1px solid $line-color
+  border-right: 1px solid $line-color
+
+.panel-search
+  background: $bg-color
+  border-bottom: 1px solid $line-color
+  padding: 10px
+  height: 130px
+  input[type=text]
+    width: 276px
+    background-color: #fff
+    padding: 2px
+  select
+    width: 280px
+    background-color: #fff
+    padding: 2px
+  input[type=checkbox]
+    background-color: #fff
+  .cbs
+    padding-top: 0
+    color: #7ea0c3
+    label
+      font-size: 12px
+      padding: 0
+      margin: 0
+      &:after
+        content: none
+    span
+      margin-right: 10px
+
+.inst-side-panel .panel-search
+  height: 32px !important
+
+.staffs-side-panel .panel-search
+  height: 70px !important
+
+.internships-side-panel .panel-search
+  height: 140px !important
+
+.panel-list
+  font-size: 90%
+  li
+    padding: 10px
+    border-bottom: 1px solid $line2-color
+    height: 48px
+    img
+      float: left
+      margin-right: 10px
+      padding-bottom: 20px
+    a
+      color: #000
+      display: block
+      width: 100%
+      height: 58px
+      text-decoration: none
+      .title
+        font-weight: bold
+        font-size: 110%
+        margin-bottom: 2px
+        overflow: hidden
+      .comment
+        color: $grey
+        font-size: 90%
+    &:hover
+      background-color: $bg-color
+    &.selected
+      background: $selected-color
+      color: #fff
+      .title
+        color: #fff
+        text-shadow: #113f7d 0px 1px 1px
+      .comment
+        color: #fff
+    &.loading
+      background-position: 240px 56px
+
+.panel-items
+  position: absolute
+  width: 300px
+  bottom: 70px
+  top: 151px
+  overflow: auto
+
+.inst-side-panel .panel-items
+  top: 53px !important
+
+.staffs-side-panel .panel-items
+  top: 91px !important
+
+.internships-side-panel .panel-items
+  top: 161px !important
+
+.panel-add
+  position: absolute
+  width: 280px
+  bottom: 0px
+  height: 20px
+  background: $bg-color
+  border-top: 1px solid $line-color
+  padding: 10px
+  text-align: center
+  &.selected
+    a
+      text-decoration: none
+      color: $selected-color
+      font-weight: bold
+  #to_excel
+    background-color: #090
+    cursor: pointer
+    color: $white
+    float: right
+    font-weight: bold
+    font-size: 8px
+    padding: 2px 8px
+
+.main-panel
+  padding-top: 32px
+  margin-left: 302px
+  .resource-header
+    padding: 10px
+    height: 100px
+    background-color: #fff
+    min-width: 500px
+    .resource-picture
+      float: left
+      font-size: 80%
+      text-align: center
+      a
+        display: none
+        position: relative
+        top: -50px
+        background: #fff
+        padding: 4px
+      &:hover a
+        display: inline
+    .resource-card
+      float: left
+      font-size: 80%
+      text-align: center
+    .resource-title
+      float: left
+      padding-top: 0px
+      margin-left: 20px
+    .resource-save
+      float: right
+      text-align: right
+      padding-top: 20px
+      width: 110px
+    .comment
+      font-size: 90%
+      color: $grey
+  #resource-tabs
+    position: relative
+    top: -27px
+    .ui-tabs-panel
+      margin-right: 10px
+    .ui-tabs-nav li.first-tab
+      margin-left: 140px
+
+.programs-main .resource-header
+  height: 70px
+
+.small-note
+  font-size: 90% !important
+  color: $grey
+
+.centered-div
+  margin: 0 auto
+
+.iframe-submit-button-area
+  margin-top: 20px
+
+.iframe-submit-button-area input[type=submit]
+  font-size: 90%
+
+#counter
+  position: fixed
+  bottom: 40px
+  height: 30px
+  width: 290px
+  color: $grey
+  background: $white
+  border-top: 1px solid $line-color
+  padding-left: 10px
+  .inner
+    text-align: center
+    margin-top: 8px

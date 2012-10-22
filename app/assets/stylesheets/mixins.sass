@@ -1,0 +1,28 @@
+=rounded($radius: 5px)
+  border-radius: $radius
+  -moz-border-radius: $radius
+  -webkit-border-radius: $radius
+
+=rounded-side($side, $radius: 5px)
+  border-#{$side}-radius: $radius
+  -moz-border-radius-#{$side}: $radius
+  -webkit-border-#{$side}-radius: $radius
+
+=shadow($blur: 4px, $top: 1px, $left: 0px, $color: #999999)
+  moz-box-shadow: $left $top $blur $color
+  -webkit-box-shadow: $left $top $blur $color
+  box-shadow: $left $top $blur $color
+
+=shadow-inset($blur: 4px, $top: 1px, $left: 0px, $color: #999999)
+  moz-box-shadow: inset $left $top $blur $color
+  -webkit-box-shadow: inset $left $top $blur $color
+  box-shadow: inset $left $top $blur $color
+
+=opacity($opacity)
+  opacity: $opacity
+  filter: Alpha(Opacity = $opacity * 100)
+
+=gradient($from, $to)
+  background: -webkit-gradient(linear, left top, left bottom, from($from), to($to))
+  background: -moz-linear-gradient(top, $from, $to)
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$from', endColorstr='$to')

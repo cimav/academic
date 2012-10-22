@@ -1,0 +1,26 @@
+%h2= "Datos personales"
+%table.data{:align=>'center',:width=>'100%'}
+  %tr.row-odd
+    %td.left= "Numero de empleado: "
+    %td.right
+      = @staff.id
+  %tr.row-even
+    %td.left= "Sexo: "
+    %td.right
+      - if @staff.gender=='F'
+        = "Mujer"
+      - if @staff.gender=='H'
+        = "Hombre"
+  %tr.row-odd
+    %td.left= "SNI: "
+    %td.right
+      = @staff.sni
+  %tr.row-even
+    %td.left= "CVU: "
+    %td.right
+      = @staff.cvu
+  %tr.row-odd
+    %td.left= "Correo Electronico: "
+    %td.right
+      = @staff.email
+

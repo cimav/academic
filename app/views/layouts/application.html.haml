@@ -1,0 +1,59 @@
+!!!
+%html
+  %head
+    %title= @page_title || 'Académicos CIMAV'
+    = stylesheet_link_tag "custom-theme/jquery-ui"
+    = stylesheet_link_tag "application"
+    /[if lt IE 8]
+    = javascript_include_tag "application"
+    - if !@include_js.nil?
+      - @include_js.each do |js|
+        = javascript_include_tag js
+    = csrf_meta_tag
+  %body
+    #standalone-content
+      #top-bar 
+        #nav-select 
+          = "Académicos CIMAV"
+        #account
+          = "["
+          %a{'href' => "/logout"}= "salir"
+          = "]"
+      #menu
+        %br
+        %br
+        %br
+        %center
+          - if @staff.image_url.nil?
+            = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/medium_default.jpg", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"Buscando imagen...", :align=>"center"
+          - else
+            = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url(:medium)}", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"Buscando imagen...", :align=>"center"
+          %br
+          %strong= "#{@staff.first_name} #{@staff.last_name}"
+          %br
+          %br
+        #menu-bar
+          %a.menu{'href' => "/"}= "  Inicio"
+          - if @screen=="index"
+            = image_tag "/assets/left-arrow-blue.png"
+          %br
+          %a.menu{'href' => "/horarios/#{@staff.id}/0"}= "  Horarios"
+          - if @screen=="schedule_table"
+            = image_tag "/assets/left-arrow-blue.png"
+          %br
+          %a.menu{'href' => "/alumnos/#{@staff.id}/0"}= "  Alumnos"
+          - if @screen=="term_grades"
+            = image_tag "/assets/left-arrow-blue.png"
+          %br
+          %a.menu{'href' => "/avances/#{@staff.id}"}= "  Avances"
+          - if @screen=="kardex"
+            = image_tag "/assets/left-arrow-blue.png"
+          %br
+          %a.menu{'href' => "/servicios/#{@staff.id}"}= "  Servicios"
+          - if @screen=="services"
+            = image_tag "/assets/left-arrow-blue.png"
+          %br
+          %br
+      #content
+        = yield
+

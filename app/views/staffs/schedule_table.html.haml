@@ -1,0 +1,66 @@
+#staff-schedule-header
+  #staff-schedule-title
+    %h2 Horario
+
+  - if !@is_pdf
+    = form_tag "", :method=>'post', :name=>"staff_form"
+    %center
+      %table{:width=>"800px"}
+        %tbody
+          %tr
+            %td{:align=>"right"}
+              = hidden_field_tag :staff_id, @staff.id
+              = "Fecha de inicio:"
+            %td
+              %input{:type=>'text',:id=>'start_date',:readonly=>true,:name=>'start_date'}
+            %td{:align=>"right"}
+              = "Fecha final:"
+            %td
+              %input{:type=>'text',:readonly=>true,:id=>'end_date',:name=>'end_date'}
+            %td
+              = submit_tag "Buscar"
+
+- if @error
+  %br
+  %p{:align=>'center'}
+    - if @error.to_i == 1
+      = "No se pueden mandar fechas vacias"
+    - if @error.to_i == 2
+      = "La fecha inicial no puede ser mayor que la final"
+- else
+  - if @is_pdf
+    = image_tag "http://posgrado.cimav.edu.mx/images/pdf-logo-top.jpg", :style => "margin-bottom: 20px; width: 100%;"
+    %h1= "Horario"
+    %div= @tcs[0].staff.full_name
+  #tc-header
+    #tc-title
+      %div= "(#{l @sd, :format => :long} – #{l @ed, :format => :long})"
+
+  - if !@is_pdf
+    .pdf-link= link_to "PDF", :controller => "staffs", :action => "schedule_table", :id => @id, :start_date=> @start_date, :end_date=>@end_date, :format => 'pdf'
+
+  %table#student-schedule
+    %tr
+      %th Hora
+      %th Lunes
+      %th Martes
+      %th Miercoles
+      %th Jueves
+      %th Viernes
+      %th Sabado
+      %th Domingo
+    - (@min_hour..@max_hour).each do |i|
+      %tr
+        %td.hora= "#{i}:00"
+        - (1..7).each do |j|
+          %td.dia
+            - @schedule[i][j].each do |k|
+              .session_block(class="session_style_#{k['n']}")
+                .session-title= k['name']
+                .session-staff= k['staff_name']
+                .session-comments= k['comments']
+
+
+#staff-schedule-area
+= javascript_include_tag "end.js"
+
