@@ -27,4 +27,11 @@ class ApplicationController < ActionController::Base
   def auth_required
     redirect_to '/login' unless authenticated?
   end
+
+  helper_method :current_user
+
+  private
+  def current_user
+    @current_user ||= Staff.find(session[:user_id]) if session[:user_id]
+  end
 end

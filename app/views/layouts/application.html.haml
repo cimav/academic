@@ -37,22 +37,13 @@
           - if @screen=="index"
             = image_tag "/assets/left-arrow-blue.png"
           %br
-          %a.menu{'href' => "/horarios/#{@staff.id}/0"}= "  Horarios"
+          %a.menu{'href' => "/horarios"}= "  Horarios"
           - if @screen=="schedule_table"
             = image_tag "/assets/left-arrow-blue.png"
           %br
-          %a.menu{'href' => "/alumnos/#{@staff.id}/0"}= "  Alumnos"
-          - if @screen=="term_grades"
+          %a.menu{'href' => "/alumnos"}= "  Alumnos"
+          - if @screen=="students"
             = image_tag "/assets/left-arrow-blue.png"
-          %br
-          %a.menu{'href' => "/avances/#{@staff.id}"}= "  Avances"
-          - if @screen=="kardex"
-            = image_tag "/assets/left-arrow-blue.png"
-          %br
-          %a.menu{'href' => "/servicios/#{@staff.id}"}= "  Servicios"
-          - if @screen=="services"
-            = image_tag "/assets/left-arrow-blue.png"
-          %br
           %br
       #content
         = yield

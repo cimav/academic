@@ -7,7 +7,7 @@ class StaffsController < ApplicationController
     @include_js =  ["jquery.ui.datepicker","jquery.ui.datepicker-es","staffs"]
 
     @screen="schedule_table"
-    @staff = Staff.find(params[:id])
+    @staff = Staff.find(current_user.id)
 
     @is_pdf = false
     @id     = params[:id]
@@ -106,4 +106,23 @@ class StaffsController < ApplicationController
     end
 
   end
+
+  def students
+    @include_js =  ["jquery.ui.datepicker","jquery.ui.datepicker-es","staffs"]
+
+    @screen="students"
+    @staff = Staff.find(current_user.id)
+  end
+ 
+  def student_files
+    @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
+    @screen="students"
+    @staff = Staff.find(current_user.id)
+    render :layout => false
+  end
+
+  def student_file
+    sf = StudentAdvancesFiles.find(params[:id]).file
+    send_file sf.to_s, :x_sendfile=>true
+  end 
 end

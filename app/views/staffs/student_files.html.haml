@@ -1,0 +1,8 @@
+- if @student_advances_files.size == 0
+  %div{'id'=>"student_advances_file_zero"}
+    = "No se han subido archivos"
+- else
+  - @student_advances_files.each do |saf|
+    %div{'id'=>"student_advances_file_#{saf.id}"}
+      = "#{StudentAdvancesFiles::STUDENT_ADVANCE_TYPE[saf.student_advance_type]}:"
+      %a{'href'=>"/alumno/archivo/#{saf.id}"}= saf.description
