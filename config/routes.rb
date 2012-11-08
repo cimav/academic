@@ -7,5 +7,8 @@ Academic::Application.routes.draw do
   match "/logout" => 'sessions#destroy'
   match '/login' => 'login#index'
 
-  match '/horarios/:id/:term_id' => 'staffs#schedule_table'
+  match '/horarios' => 'staffs#schedule_table'
+  match '/alumnos' => 'staffs#students'
+  match '/alumno/archivos/:id' => 'staffs#student_files'
+  match '/alumno/archivo/:id' => 'staffs#student_file'
 end
