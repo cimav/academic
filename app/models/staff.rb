@@ -21,6 +21,9 @@ class Staff < ActiveRecord::Base
   has_many :staff_file
   accepts_nested_attributes_for :staff_file
 
+  has_many :student_advances_file_message, :as => :attachable
+  accepts_nested_attributes_for :student_advances_file_message
+
   has_one :contact, :as => :attachable
   accepts_nested_attributes_for :contact
 

@@ -1,3 +1,4 @@
+=hidden_field_tag :hidden_name, "#{@staff.first_name} #{@staff.last_name}"
 -if @staff.supervised.where(:status => Student::ACTIVE).count > 0 || @staff.co_supervised.where(:status => Student::ACTIVE).count > 0
   %h2 Estudiantes activos
   %table.formatted-table.students_active
@@ -94,4 +95,3 @@
       });
     });
 
-  

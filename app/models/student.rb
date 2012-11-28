@@ -27,6 +27,9 @@ class Student < ActiveRecord::Base
   has_many :term_students
   accepts_nested_attributes_for :term_students
 
+  has_many :student_advances_file_message, :as => :attachable
+  accepts_nested_attributes_for :student_advances_file_message
+
   ACTIVE    = 1
   GRADUATED = 2
   INACTIVE  = 3
