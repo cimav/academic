@@ -27,7 +27,8 @@
           - if @staff.image_url.nil?
             = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/medium_default.jpg", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"Buscando imagen...", :align=>"center"
           - else
-            = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url(:medium)}", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"Buscando imagen...", :align=>"center"
+            %div{:style=>"width:100px;height:100px;border: 1px solid #EEEEEE"}
+              = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url(:medium)}", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"x", :align=>"center"
           %br
           %strong= "#{@staff.first_name} #{@staff.last_name}"
           %br
