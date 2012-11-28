@@ -7,7 +7,7 @@ class StudentAdvancesFileMessagesController < ApplicationController
 
 
   def index
-    @student = Student.includes(:program).find(session[:user_id])
+    @staff = Student.includes(:program).find(session[:user_id])
     @safms   = StudentAdvancesFileMessage.where(:student_advances_file_id=>params[:student_advances_file_id])
     @saf_id  = params[:student_advances_file_id]
     @safm = StudentAdvancesFileMessage.new
@@ -19,7 +19,7 @@ class StudentAdvancesFileMessagesController < ApplicationController
     @staff = Staff.find(session[:user_id])
     @safm    = @staff.student_advances_file_message.create(params[:student_advances_file_message])
     
-    if @student.save
+    if @staff.save
       flash[:notice]=params[:student_advances_file_message][:message]
       respond_with do |format|
         format.html do 
@@ -40,7 +40,7 @@ class StudentAdvancesFileMessagesController < ApplicationController
           if request.xhr?
             json = {}
             json[:flash] = flash
-            json[:errors] = @student.errors
+            json[:errors] = @staff.errors
             render :json => json, :status => :unprocessable_entity
           else
             redirect_to :action => 'index'
@@ -72,7 +72,7 @@ class StudentAdvancesFileMessagesController < ApplicationController
           if request.xhr?
             json = {}
             json[:flash] = flash
-            json[:errors] = @student.errors
+            json[:errors] = @safm.errors
             render :json => json, :status => :unprocessable_entity
           else
             redirect_to :action => 'index'

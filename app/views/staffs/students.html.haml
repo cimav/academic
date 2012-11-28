@@ -24,9 +24,9 @@
           - else
             - resultset.each_with_index do |ts, index|
               %td
-                %a{'id'=>"a_#{ts.id}",'s_id'=>ts.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
+                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
               %tr
-                %td{'id'=>"slider_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
+                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
                   = "Buscando archivos..."
 
       - @staff.co_supervised.where(:status => Student::ACTIVE).order("start_date").each_with_index do |supervised, index|
@@ -70,12 +70,48 @@
           %td= supervised.staff_supervisor.full_name rescue ''
           %td= supervised.staff_co_supervisor.full_name rescue ''
 
+%h2 Avances
+- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and status='P' and advance_date>=:date",:id=>current_user.id,:date=>Date.today - 300.days)
+
+- if advs.size == 0 
+  = "No hay avances que mostrar"
+- else 
+  %table.formatted-table.students_active
+    %tbody
+      %tr.header
+        %th Nombre
+        %th Titulo
+        %th Fecha
+        %th Avances
+      - advs.each do |adv|
+        - flag = 0
+        - resultset = adv.student.term_students.joins(:term).where("start_date<=? and end_date>=?",Date.today,Date.today)
+        - resultset.each_with_index do |ts, index|
+          - if ts.term.start_date.to_datetime <= adv.advance_date.to_datetime
+            - flag = flag + 1
+        - if 1 #flag>=1
+          %tr.active-student-item{:id=>"active_advance_#{adv.id}", :advance_id=>adv.id}
+            %td= adv.student.full_name
+            %td= adv.title
+            %td= l adv.advance_date, :format => :long
+            - if resultset.size<=0
+              %td
+                = "No hay ciclos vigentes"
+            - else
+              - resultset.each_with_index do |ts, index|
+                %td
+                  %a{'id'=>"a_#{adv.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>adv.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
+                %tr
+                  %td{'id'=>"slider_#{adv.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
+                    = "Buscando archivos..."
+
 :javascript
   $('.ts_files')
     .click(function(){
       var id      = $(this).attr("s_id");
-      var a       = $("#a_"+id);
-      var jqObj   = $("#slider_"+id);
+      var adv_id  = $(this).attr("adv_id");
+      var a       = $("#a_"+adv_id+"_"+id);
+      var jqObj   = $("#slider_"+adv_id+"_"+id);
       var display = jqObj.css("display");
       if(display=='none'){
         jqObj.show("slow");
