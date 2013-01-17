@@ -57,7 +57,8 @@
           %td= supervised.program.name
           %td= supervised.campus.name rescue ''
           %td= l supervised.start_date, :format => :short
-          %td= l supervised.thesis.defence_date, :format => :short
+          %td= ""
+          =# %td=# l supervised.thesis.defence_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
           %td= supervised.staff_co_supervisor.full_name rescue ''
       - @staff.co_supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
@@ -66,11 +67,12 @@
           %td= supervised.program.name
           %td= supervised.campus.name rescue ''
           %td= l supervised.start_date, :format => :short
-          %td= l supervised.thesis.defence_date, :format => :short
+          %td= ""
+          =#%td= l supervised.thesis.defence_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
           %td= supervised.staff_co_supervisor.full_name rescue ''
 
-%h2 Avances
+%h2 Avances de comite tutoral
 - advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and status='P' and advance_date>=:date",:id=>current_user.id,:date=>Date.today - 300.days)
 
 - if advs.size == 0 

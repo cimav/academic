@@ -10,7 +10,7 @@ class StaffsController < ApplicationController
     @staff = Staff.find(current_user.id)
 
     @is_pdf = false
-    @id     = params[:id]
+    @id     = params[:staff_id]
 
     @start_date = params[:start_date]
     @end_date   = params[:end_date]
