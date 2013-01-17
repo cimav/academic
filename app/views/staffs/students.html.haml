@@ -36,8 +36,17 @@
           %td= supervised.campus.name
           %td= l supervised.start_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
-          %td= supervised.staff_co_supervisor.full_name rescue ''
-          %td ver
+          - resultset = supervised.term_students.joins(:term).where("start_date<=? and end_date>=?",Date.today,Date.today)
+          - if resultset.size<=0
+            %td
+              = "No hay ciclos vigentes"
+          - else
+            - resultset.each_with_index do |ts, index|
+              %td
+                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
+              %tr
+                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
+                  = "Buscando archivos..."
 
 -if @staff.supervised.where(:status => Student::GRADUATED).count > 0 || @staff.co_supervised.where(:status => Student::GRADUATED).count > 0
   %h2 Estudiantes graduados
