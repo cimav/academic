@@ -1,5 +1,5 @@
 class Staff < ActiveRecord::Base
-  attr_accessible :id,:employee_number,:title,:first_name,:last_name,:gender,:date_of_birth,:location,:email,:institution_id,:contact_id,:cvu,:sni,:status,:image,:notes,:created_at,:updated_at,:lab_practices_attributes,:seminars_attributes,:external_courses_attributes
+  attr_accessible :id,:employee_number,:title,:first_name,:last_name,:gender,:date_of_birth,:location,:email,:institution_id,:contact_id,:cvu,:sni,:status,:image,:notes,:created_at,:updated_at,:lab_practices_attributes,:seminars_attributes,:external_courses_attributes,:contact_attributes
   belongs_to :institution
   has_many :term_course_schedule
 

@@ -76,6 +76,7 @@ class StaffsController < ApplicationController
         details = {
           "name"           => session_item.term_course.course.name,
           "staff_name" => staff_name,
+          "classroom"  => session_item.classroom.name,
           "comments"   => comments,
           "id"         => session_item.id,
           "n"          => courses[session_item.term_course.course.id]
