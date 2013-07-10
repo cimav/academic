@@ -1,0 +1,21 @@
+%h2="Calificaciones"
+
+%table#student-schedule
+  - counter= 0
+  - @tc.each do |tc|
+    - counter = counter + 1
+    %tr
+      %td.dia
+        .session_block(class="session_style_#{counter}")
+          .session-title
+            - if tc.term.status.eql? 3
+              %a{:href=>"calificar/#{tc.id}"}= tc.course.name
+            - else
+              = tc.course.name
+          .session-staff= "Grupo #{tc.group}"
+          .session-comments= "Ciclo #{tc.term.name}"
+          .session-comments= "Estatus: #{Term::STATUS[tc.term.status]}"
+    - if counter == 10
+      - counter = 0
+     
+

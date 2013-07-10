@@ -126,4 +126,117 @@ class StaffsController < ApplicationController
     sf = StudentAdvancesFiles.find(params[:id]).file
     send_file sf.to_s, :x_sendfile=>true
   end 
+
+  def grades
+    @screen = "grades"
+    @staff  = Staff.find(current_user.id)
+
+    @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, Date.today, Date.today)
+
+    respond_with do |format|
+      format.html do
+        render :layout => true
+      end
+    end
+  end
+
+  def get_grades
+    @include_js =  ["staffs"]
+    @screen = "grades"
+    @staff = Staff.find(current_user.id)
+    @tc_id = params[:tc_id] 
+ 
+    ## r is from relationship
+    @tc_r     = TermCourse.joins(:term).where("term_courses.id=? AND terms.status = 3 AND terms.start_date <= ? AND terms.end_date >= ?", @tc_id, Date.today, Date.today)
+    @tc = @tc_r[0]
+
+    if @tc_r.size > 0
+      @tcs = TermCourseStudent.where(:term_course_id=>@tc_id)
+    end
+  end 
+
+  def set_grades
+    parameters = {}
+    errors_counter = 0
+    errors_array = Array.new
+    counter = 0
+    @staff = Staff.find(current_user.id)
+    @tcs_id = params["tcs_id_#{counter}"]
+    @grade = params["grade_#{counter}"]
+
+    while @tcs_id != nil  do
+      tcs = TermCourseStudent.find(@tcs_id)
+      @term = Term.where("id=? AND status=3 AND start_date<=? AND end_date >= ?", tcs.term_course.term.id, Date.today, Date.today)
+
+      ## If term is not activate
+      if @term.size > 0
+        if !@grade.nil?
+          tcs.grade= @grade
+          if !tcs.save
+            errors_counter= errors_counter + 1
+            errors_array.push("Error al guardar la calificacion con id = #{@tcs_id}")
+          end  
+        end
+      else
+        errors_counter= errors_counter + 1
+        errors_array.push("La calificacion no esta lista para ser guardada")
+      end 
+      
+      counter = counter + 1
+      @tcs_id  = params["tcs_id_#{counter}"]
+      @grade   = params["grade_#{counter}"]
+    end
+
+
+    if errors_counter > 0
+      render_error @staff,"Error",parameters,errors_array
+    else
+      render_message @staff,"Calificaciones guardadas correctamente",parameters
+    end
+
+
+  end
+
+  def render_error(object,message,parameters,errors)
+    if errors.nil?
+      errors = object.errors
+    end
+   
+    flash = {}
+    flash[:error] = message
+    respond_with do |format|
+      format.html do
+        if request.xhr?
+          json = {}
+          json[:flash] = flash
+          json[:errors] = errors
+          json[:errors_full] = object.errors.full_messages
+          json[:params] = parameters
+          render :json => json, :status => :unprocessable_entity
+        else
+          redirect_to object
+        end
+      end
+    end
+  end
+
+  def render_message(object,message,parameters)
+    flash = {}
+    flash[:notice] = message
+    respond_with do |format|
+      format.html do
+        if request.xhr?
+          json = {}
+          json[:flash] = flash
+          json[:uniq]  = object.id
+          json[:params] = parameters
+          render :json => json
+        else
+          redirect_to object
+        end
+      end
+    end
+  end
+
+
 end

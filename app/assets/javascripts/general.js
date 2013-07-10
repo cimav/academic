@@ -245,3 +245,25 @@ function autoResizeIFRAME(id){
   document.getElementById(id).height = (newheight) + "px";
   document.getElementById(id).width = (newwidth) + "px";
 }
+
+function showMessage(message,errors)
+{
+  $("#message-area").slideDown();
+  
+  if (errors){
+    message = processErrorMessage(message,errors); 
+  }
+
+  $("#message-area").html(message)
+  $("#message-area").delay(15000).slideUp();
+}
+
+function processErrorMessage(message,errors)
+{
+  $.each(errors,function(i,v){
+    message = message+"<br>"+(i+1)+". "+v;
+  });
+
+  message = "<font color='#ff0000'>"+message+"</font>"
+  return message     
+}

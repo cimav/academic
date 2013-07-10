@@ -9,6 +9,9 @@ Academic::Application.routes.draw do
 
   match '/horarios' => 'staffs#schedule_table'
   match '/alumnos' => 'staffs#students'
+  match '/calificaciones' => 'staffs#grades'
+  match '/calificar/:tc_id' => 'staffs#get_grades'
+  match '/calificar/:tc_id/set' => 'staffs#set_grades'
   match '/alumno/archivos/:id' => 'staffs#student_files'
   match '/alumno/archivo/:id' => 'staffs#student_file'
   

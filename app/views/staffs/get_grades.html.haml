@@ -1,0 +1,24 @@
+%h2="Calificaciones"
+- if @tc_r.size <= 0 
+  = "El curso no esta listo para ser calificado"
+- else
+  %h3=@tc.course.name
+
+  = form_tag "/calificar/#{@tc.id}/set",:remote =>true, :id=>"grades-form", :name=>"grades-form"
+  %table.tc-students
+    %tr.header
+      %th="Matricula"
+      %th="Nombre del alumno"
+      %th="Calificación"
+      - @tcs.each_with_index do |tcs,i|
+        %tr
+          %td= tcs.term_student.student.card
+          %td= tcs.term_student.student.full_name
+          %td
+            = select_tag "grade_#{i}", options_for_select( (0..100).to_a, tcs.grade.to_s), "tcs_id" => tcs.id, :prompt => "----" 
+            = hidden_field_tag "tcs_id_#{i}", tcs.id
+    %tr
+      %td{:colspan=>"3"}
+        = submit_tag "Calificar"
+        = image_tag "/images/ajax-load2.gif", :id => "img-load-grades", :alt=>"Loading...", :align=>"center",:width=>"20px",:style=>"display: none;"
+        #message-area
