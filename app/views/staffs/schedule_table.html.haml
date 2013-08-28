@@ -2,24 +2,6 @@
   #staff-schedule-title
     %h2 Horario
 
-  - if !@is_pdf
-    = form_tag "", :method=>'post', :name=>"staff_form"
-    %center
-      %table{:width=>"800px"}
-        %tbody
-          %tr
-            %td{:align=>"right"}
-              = hidden_field_tag :staff_id, @staff.id
-              = "Fecha de inicio:"
-            %td
-              %input{:type=>'text',:id=>'start_date',:readonly=>true,:name=>'start_date'}
-            %td{:align=>"right"}
-              = "Fecha final:"
-            %td
-              %input{:type=>'text',:readonly=>true,:id=>'end_date',:name=>'end_date'}
-            %td
-              = submit_tag "Buscar"
-
 - if @error
   %br
   %p{:align=>'center'}

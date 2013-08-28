@@ -11,35 +11,15 @@ class StaffsController < ApplicationController
 
     @is_pdf = false
     @id     = params[:staff_id]
-
-    @start_date = params[:start_date]
-    @end_date   = params[:end_date]
-    logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|#{@start_date}|#{@end_date}|"
-
-    if @start_date.blank? and @end_date.blank?
-      @error = 0 ## no hay error simplemente si esta todo vacio no mostramos nada
-      render :layout => true and return
-    end
-
-    if @start_date.blank? or @end_date.blank?
-      @error = 1 # No se pueden mandar fechas vacias
-      render :layout => true and return
-    end
     
+    @date   = Date.today.strftime("%Y-%m-%d")
 
-    @sd  = Date.parse(@start_date)
-    @ed  = Date.parse(@end_date)
+    @tcs  = TermCourseSchedule.joins(:term_course=>:term).where("terms.status in (1,2,3) AND term_course_schedules.status=:status AND term_course_schedules.staff_id=:id AND (terms.start_date<=:date AND terms.end_date>=:date)",{:status=>1,:id=>@staff.id,:date=>@date})
 
-    @diference    = @ed - @sd
+    @sd = @tcs.minimum(:start_date)
+    @ed = @tcs.maximum(:end_date)
 
-    if @diference.to_i < 0
-      @error  = 2 #La fecha inicial es mayor que la final
-      render :layout => true  and return
-    end
-
-    @tcs = TermCourseSchedule.joins(:term_course).where("term_course_schedules.staff_id = :staff_id AND term_courses.status=1 AND ((start_date <= :start_date AND :start_date <= end_date) OR (start_date <= :end_date AND :end_date <= end_date) OR (start_date > :start_date AND :end_date > end_date))",{:staff_id => @id,:start_date => @start_date,:end_date => @end_date});
-
-       @schedule = Hash.new
+    @schedule = Hash.new
     (4..22).each do |i|
       @schedule[i] = Array.new
       (1..7).each do |j|
@@ -130,8 +110,9 @@ class StaffsController < ApplicationController
   def grades
     @screen = "grades"
     @staff  = Staff.find(current_user.id)
+    @today  = Date.today - 30
 
-    @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, Date.today, Date.today)
+    @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, @today, @today)
 
     respond_with do |format|
       format.html do
@@ -145,9 +126,10 @@ class StaffsController < ApplicationController
     @screen = "grades"
     @staff = Staff.find(current_user.id)
     @tc_id = params[:tc_id] 
+    @today  = Date.today - 30
  
     ## r is from relationship
-    @tc_r     = TermCourse.joins(:term).where("term_courses.id=? AND terms.status = 3 AND terms.start_date <= ? AND terms.end_date >= ?", @tc_id, Date.today, Date.today)
+    @tc_r     = TermCourse.joins(:term).where("term_courses.id=? AND terms.status = 3 AND terms.start_date <= ? AND terms.end_date >= ?", @tc_id, @today, @today)
     @tc = @tc_r[0]
 
     if @tc_r.size > 0
@@ -163,10 +145,11 @@ class StaffsController < ApplicationController
     @staff = Staff.find(current_user.id)
     @tcs_id = params["tcs_id_#{counter}"]
     @grade = params["grade_#{counter}"]
+    @today  = Date.today - 30
 
     while @tcs_id != nil  do
       tcs = TermCourseStudent.find(@tcs_id)
-      @term = Term.where("id=? AND status=3 AND start_date<=? AND end_date >= ?", tcs.term_course.term.id, Date.today, Date.today)
+      @term = Term.where("id=? AND status=3 AND start_date<=? AND end_date >= ?", tcs.term_course.term.id, @today, @today)
 
       ## If term is not activate
       if @term.size > 0
