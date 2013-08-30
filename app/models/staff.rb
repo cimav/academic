@@ -18,6 +18,7 @@ class Staff < ActiveRecord::Base
   has_many :co_supervised, :class_name => "Student", :foreign_key => :co_supervisor
 
   has_many :term_courses
+  has_many :grade_log
   has_many :staff_file
   accepts_nested_attributes_for :staff_file
 

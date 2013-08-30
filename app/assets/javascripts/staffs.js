@@ -23,8 +23,10 @@ $(document).ready(function() {
     .bind("ajax:success",function(evt, data, status, xhr){
       var r = $.parseJSON(xhr.responseText);
       showMessage(r.flash.notice);
-      $(this).find('input[type="submit"]').removeAttr("disabled")
       $("#img-load-grades").hide();
+      $("#message-area-2").hide();
+      $("#message-area-3").show();
+      $(this).find('select').attr("disabled","disabled")
     })
     .bind("ajax:error",function(evt, xhr, status, error){
       var r = $.parseJSON(xhr.responseText);

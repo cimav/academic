@@ -110,7 +110,7 @@ class StaffsController < ApplicationController
   def grades
     @screen = "grades"
     @staff  = Staff.find(current_user.id)
-    @today  = Date.today - 30
+    @today  = Date.today
 
     @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, @today, @today)
 
@@ -126,7 +126,7 @@ class StaffsController < ApplicationController
     @screen = "grades"
     @staff = Staff.find(current_user.id)
     @tc_id = params[:tc_id] 
-    @today  = Date.today - 30
+    @today  = Date.today
  
     ## r is from relationship
     @tc_r     = TermCourse.joins(:term).where("term_courses.id=? AND terms.status = 3 AND terms.start_date <= ? AND terms.end_date >= ?", @tc_id, @today, @today)
@@ -145,7 +145,7 @@ class StaffsController < ApplicationController
     @staff = Staff.find(current_user.id)
     @tcs_id = params["tcs_id_#{counter}"]
     @grade = params["grade_#{counter}"]
-    @today  = Date.today - 30
+    @today  = Date.today
 
     while @tcs_id != nil  do
       tcs = TermCourseStudent.find(@tcs_id)
@@ -158,6 +158,8 @@ class StaffsController < ApplicationController
           if !tcs.save
             errors_counter= errors_counter + 1
             errors_array.push("Error al guardar la calificacion con id = #{@tcs_id}")
+          else
+            GradesLog.new({:staff_id=>@staff.id, :term_course_student_id=>tcs.id}).save
           end  
         end
       else
