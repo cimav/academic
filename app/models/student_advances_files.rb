@@ -1,7 +1,7 @@
 class StudentAdvancesFiles < ActiveRecord::Base
   attr_accessible :id, :term_student_id,:student_advance_type,:description,:file
 
-  default_scope joins(:term_student=>[:student]).where('students.deleted=?',0)
+  default_scope joins(:term_student=>[:student]).where('students.deleted=?',0).readonly(false)
 
   mount_uploader :file, StudentAdvancesFileUploader
 
