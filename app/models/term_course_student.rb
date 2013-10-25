@@ -2,6 +2,8 @@
 class TermCourseStudent < ActiveRecord::Base
   attr_accessible :id,:term_course_id,:term_student_id,:grade,:status,:created_at,:updated_at
 
+  default_scope joins(:term_student=>[:student]).where('students.deleted=?',0)
+
   has_many :grade_log
 
   belongs_to :term_course
