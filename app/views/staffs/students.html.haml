@@ -17,7 +17,7 @@
           %td= supervised.campus.name rescue ''
           %td= l supervised.start_date, :format => :short
           %td= supervised.staff_co_supervisor.full_name rescue ''
-          - resultset = supervised.term_students.joins(:term).where("start_date<=? and end_date>=?",Date.today,Date.today)
+          - resultset = supervised.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
           - if resultset.size<=0
             %td
               = "No hay ciclos vigentes"
@@ -82,7 +82,7 @@
           %td= supervised.staff_co_supervisor.full_name rescue ''
 
 %h2 Avances de comite tutoral
-- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and status='P' and advance_date>=:date",:id=>current_user.id,:date=>Date.today - 300.days)
+- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date",:id=>current_user.id,:date=>Date.today - 300.days)
 
 - if advs.size == 0 
   = "No hay avances que mostrar"
@@ -96,7 +96,7 @@
         %th Avances
       - advs.each do |adv|
         - flag = 0
-        - resultset = adv.student.term_students.joins(:term).where("start_date<=? and end_date>=?",Date.today,Date.today)
+        - resultset = adv.student.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
         - resultset.each_with_index do |ts, index|
           - if ts.term.start_date.to_datetime <= adv.advance_date.to_datetime
             - flag = flag + 1

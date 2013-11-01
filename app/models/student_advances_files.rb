@@ -5,6 +5,7 @@ class StudentAdvancesFiles < ActiveRecord::Base
 
   mount_uploader :file, StudentAdvancesFileUploader
 
+  belongs_to :term_student
   has_many :student_advances_file_message
   accepts_nested_attributes_for :student_advances_file_message
 
