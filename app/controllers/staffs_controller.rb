@@ -12,12 +12,12 @@ class StaffsController < ApplicationController
     @is_pdf = false
     @id     = params[:staff_id]
     
-    @date   = Date.today.strftime("%Y-%m-%d")
+    @date   = (Date.today+20).strftime("%Y-%m-%d")
 
     @tcs  = TermCourseSchedule.joins(:term_course=>:term).where("terms.status in (1,2,3) AND term_course_schedules.status=:status AND term_course_schedules.staff_id=:id AND (terms.start_date<=:date AND terms.end_date>=:date)",{:status=>1,:id=>@staff.id,:date=>@date})
 
-    @sd = @tcs.minimum(:start_date)
-    @ed = @tcs.maximum(:end_date)
+    @sd = @tcs.minimum(:start_date) || Date.today
+    @ed = @tcs.maximum(:end_date)   || Date.today
 
     @schedule = Hash.new
     (4..22).each do |i|
