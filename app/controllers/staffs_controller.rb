@@ -54,12 +54,13 @@ class StaffsController < ApplicationController
         staff_name = session_item.staff.full_name rescue 'Sin docente'
 
         details = {
-          "name"           => session_item.term_course.course.name,
-          "staff_name" => staff_name,
-          "classroom"  => session_item.classroom.name,
-          "comments"   => comments,
-          "id"         => session_item.id,
-          "n"          => courses[session_item.term_course.course.id]
+          "name"         => session_item.term_course.course.name,
+          "staff_name"   => staff_name,
+          "classroom"    => session_item.classroom.name,
+          "tc_id"       => session_item.term_course_id,
+          "comments"     => comments,
+          "id"           => session_item.id,
+          "n"            => courses[session_item.term_course.course.id]
        }
 
         @schedule[h][session_item.day] << details
@@ -178,8 +179,12 @@ class StaffsController < ApplicationController
     else
       render_message @staff,"Calificaciones guardadas correctamente",parameters
     end
+  end
 
-
+  def show_classroom_students
+    @staff   = Staff.find(current_user.id)
+    @tc      = TermCourse.find(params[:tc_id])
+    @screen  = "schedule_table"
   end
 
   def render_error(object,message,parameters,errors)

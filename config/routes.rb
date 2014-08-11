@@ -14,6 +14,7 @@ Academic::Application.routes.draw do
   match '/calificar/:tc_id/set' => 'staffs#set_grades'
   match '/alumno/archivos/:id' => 'staffs#student_files'
   match '/alumno/archivo/:id' => 'staffs#student_file'
-  
+  match '/clase/:tc_id' => 'staffs#show_classroom_students' 
+ 
   resources :student_advances_file_messages, :path=>'/avances/mensajes'
 end
