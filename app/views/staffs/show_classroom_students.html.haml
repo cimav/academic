@@ -1,0 +1,16 @@
+#staff-schedule-header
+  #staff-schedule-title
+    %h2 Alumnos de #{@tc.course.name}
+
+%br
+%p
+%br
+- tcs = TermCourseStudent.where(:term_course_id=>@tc.id)
+- if tcs.size > 0
+  - tcs.each do |tcs|
+    %p= tcs.term_student.student.full_name
+- else
+  %p= "No hay alumnos que mostrar"
+
+%center
+  =link_to "Volver a Horarios", "/horarios"
