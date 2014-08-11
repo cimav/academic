@@ -36,7 +36,7 @@
           %td= supervised.campus.name
           %td= l supervised.start_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
-          - resultset = supervised.term_students.joins(:term).where("start_date<=? and end_date>=?",Date.today,Date.today)
+          - resultset = supervised.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
           - if resultset.size<=0
             %td
               = "No hay ciclos vigentes"

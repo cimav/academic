@@ -18,7 +18,7 @@
     #tc-title
       %div= "(#{l @sd, :format => :long} – #{l @ed, :format => :long})"
 
-  - if !@is_pdf
+  - if !@is_pdf && @tcs.size!=0
     .pdf-link= link_to "PDF", :controller => "staffs", :action => "schedule_table", :id => @id, :start_date=> @start_date, :end_date=>@end_date, :format => 'pdf'
 
   %table#student-schedule
