@@ -1,5 +1,5 @@
 class Student < ActiveRecord::Base
-  attr_accessible :id,:program_id,:card,:previous_card,:consecutive,:first_name,:last_name,:gender,:date_of_birth,:city,:state_id,:country_id,:email,:previous_institution,:previous_degree_type,:previous_degree_desc,:previous_degree_date,:contact_id,:start_date,:end_date,:graduation_date,:inactive_date,:supervisor,:co_supervisor,:department_id,:curp,:ife,:cvu,:location,:ssn,:blood_type,:accident_contact,:accident_phone,:passport,:image,:status,:notes,:created_at,:updated_at,:campus_id,:contact_attributes,:scholarship_attributes,:thesis_attributes,:email_cimav,:domain_password,:advance_attributes
+  attr_accessible :id,:program_id,:card,:previous_card,:consecutive,:first_name,:last_name,:gender,:date_of_birth,:city,:state_id,:country_id,:email,:previous_institution,:previous_degree_type,:previous_degree_desc,:previous_degree_date,:contact_id,:start_date,:end_date,:graduation_date,:inactive_date,:supervisor,:co_supervisor,:department_id,:curp,:ife,:cvu,:location,:ssn,:blood_type,:accident_contact,:accident_phone,:passport,:image,:status,:notes,:created_at,:updated_at,:campus_id,:contact_attributes,:scholarship_attributes,:thesis_attributes,:email_cimav,:domain_password,:advance_attributes,:studies_plan_id
  
   default_scope where(:deleted=>0)
 
@@ -38,12 +38,14 @@ class Student < ActiveRecord::Base
   INACTIVE  = 3
   UNREGISTERED = 4
   FINISH = 5
+  PENROLLMENT  = 6
 
   STATUS = {ACTIVE    => 'Activo',
             FINISH => 'Egresado no graduado',
             GRADUATED => 'Graduado',
             INACTIVE  => 'Baja temporal',
-            UNREGISTERED  => 'Baja definitiva'
+            UNREGISTERED  => 'Baja definitiva',
+            PENROLLMENT   => 'Pre-inscrito'
            }
 
   def status_type

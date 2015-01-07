@@ -1,6 +1,7 @@
 %h2="Calificaciones"
-
 %table#student-schedule
+  %caption
+    %h3="Grupos"
   - counter= 0
   - if @tc.size > 0
     - @tc.each do |tc|
@@ -22,4 +23,22 @@
     %tr
       %td="No hay ciclos activos para calificar"
      
+
+%table#student-schedule{:style=>'border:0px;'}
+  %caption
+    %h3="Avances Programáticos"
+  - counter= 0
+  - if @advances.size > 0
+    - @advances.each do |a|
+      - counter = counter + 1
+      %tr
+        %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
+          .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
+            .session-title
+              = a.student.full_name
+            .session-staff{:id=>"sstaff_#{a.id}"}= "#{a.title}"
+            .session-comments= a.student.program.name
+  - else
+    %tr
+      %td="No hay avances a calificar"
 

@@ -1,6 +1,7 @@
 class Program < ActiveRecord::Base
   attr_accessible :id,:name,:level,:prefix,:description,:created_at,:updated_at,:terms_duration,:terms_qty,:program_type,:terms_attributes
   has_many :documentation_file
+  has_many :studies_plan
   accepts_nested_attributes_for :documentation_file
 
   MASTER        = 1

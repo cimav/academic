@@ -3,6 +3,7 @@ class TermCourse < ActiveRecord::Base
   belongs_to :term
   belongs_to :course
   belongs_to :staff
+  has_many :term_course_student
 
   has_many :term_course_schedules
   accepts_nested_attributes_for :term_course_schedules

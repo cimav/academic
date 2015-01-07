@@ -109,11 +109,14 @@ class StaffsController < ApplicationController
   end 
 
   def grades
+    @include_js =  ["grades"]
     @screen = "grades"
     @staff  = Staff.find(current_user.id)
     @today  = Date.today
 
     @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, @today, @today)
+
+    @advances = Advance.joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("terms.start_date<=:today AND terms.end_date>=:today AND terms.start_date<=advances.advance_date AND terms.end_date>=advances.advance_date AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:today=>Date.today,:id=>1,:level=>[1,2])
 
     respond_with do |format|
       format.html do
@@ -180,6 +183,26 @@ class StaffsController < ApplicationController
       render_message @staff,"Calificaciones guardadas correctamente",parameters
     end
   end
+  
+  def get_advance_grades
+    @include_js =  ["grades"]
+    @screen     = "grades"
+    @staff      = Staff.find(current_user.id)
+    @advance    = Advance.find(params[:id])
+  end
+
+  def set_advance_grades
+    parameters = {}
+    errors_counter = 0
+    errors_array = Array.new
+    counter = 0
+    @staff = Staff.find(current_user.id)
+    if errors_counter > 0
+      render_error @staff,"Error",parameters,errors_array
+    else
+      render_message @staff,"Calificaciones guardadas correctamente",parameters
+    end
+  end
 
   def show_classroom_students
     @staff   = Staff.find(current_user.id)
@@ -187,46 +210,12 @@ class StaffsController < ApplicationController
     @screen  = "schedule_table"
   end
 
-  def render_error(object,message,parameters,errors)
-    if errors.nil?
-      errors = object.errors
-    end
-   
-    flash = {}
-    flash[:error] = message
-    respond_with do |format|
-      format.html do
-        if request.xhr?
-          json = {}
-          json[:flash] = flash
-          json[:errors] = errors
-          json[:errors_full] = object.errors.full_messages
-          json[:params] = parameters
-          render :json => json, :status => :unprocessable_entity
-        else
-          redirect_to object
-        end
-      end
-    end
+  def enrollments
+    @include_js =  ["enrollments"]
+    @screen   = "enrollments"
+    @staff    = Staff.find(current_user.id)
+    ## Estudiantes con estatus de preinscrito
+    #@students = Student.where(supervisor: @staff.id, status: Student::PENROLLMENT)
+    @students = Student.where(supervisor: @staff.id, status: [1,6])
   end
-
-  def render_message(object,message,parameters)
-    flash = {}
-    flash[:notice] = message
-    respond_with do |format|
-      format.html do
-        if request.xhr?
-          json = {}
-          json[:flash] = flash
-          json[:uniq]  = object.id
-          json[:params] = parameters
-          render :json => json
-        else
-          redirect_to object
-        end
-      end
-    end
-  end
-
-
 end
