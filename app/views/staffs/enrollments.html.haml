@@ -1,0 +1,35 @@
+%h3
+  ="Inscripciones  "
+  ="&nbsp;&nbsp;".html_safe
+  = image_tag "help.png", :id=> "help_ico", :width=>'18px', :style=>"cursor:pointer; position: absolute;"
+
+%br
+%table#student-schedule{:style=>'border:0px;width:500px;'}
+  - counter = 0
+  - if @students.size > 0
+    - @students.each do |s|
+      - counter = counter + 1
+      %tr
+        %td.dia{:style=>'cursor:pointer;border:0px',:id=>s.id,:status=>s.status}
+          .session_block(class="session_style_#{counter}"){:id=>"sblock_#{s.id}"}
+            .session-title
+              = s.full_name
+              - if s.status.eql? 6
+                = image_tag "ok_40px.png", :id=> "img_ok_#{s.id}" ,:align=> 'right', :width=>'30px'
+              - else
+                = image_tag "fail_40px.png", :id=> "img_fail_#{s.id}" ,:align=> 'right', :width=>'30px'
+            .session-staff{:id=>"sstaff_#{s.id}"}= s.program.name
+          
+  - else
+    %tr
+      %td.dia= "No hay alumnos para inscripción"
+
+#content-panel.main-panel.programs-main
+
+#new-enrollment-dialog
+  #courses
+    = image_tag "ajax-load2.gif", :id=> "img-loader",:align=>:center,:valign=>:center
+  #buttons
+    = submit_tag "Enviar materias", :id=>"nedSendButton",:align=>:center,:disabled=>:disabled
+    = button_tag "Cerrar", :disable_with => "Enviando..." , :id=>"nedCloseButton", :class=>"message-button"
+#help-dialog
