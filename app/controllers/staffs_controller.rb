@@ -187,8 +187,22 @@ class StaffsController < ApplicationController
   def get_advance_grades
     @include_js =  ["grades"]
     @screen     = "grades"
+    @access     = false
+    
     @staff      = Staff.find(current_user.id)
     @advance    = Advance.find(params[:id])
+
+    if @staff.id.to_i.eql? @advance.tutor1.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor2.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor3.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor4.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor5.to_i
+      @access = true
+    end
   end
 
   def set_advance_grades

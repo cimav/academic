@@ -1,16 +1,17 @@
 %h2="Calificaciones (avance programatico)"
-= form_tag "/calificar/avance/#{@advance.id}/set",:remote =>true, :id=>"advance-grades-form", :name=>"advance-grades-form"
-%table.tc-students
-  %tr
-    %td
-      %p=@advance.student.full_name
-      %p=@advance.title
-      %p=@advance.student.program.name
-  %tr
-    %td
-      = select_tag "grade_#{@advance.id}", options_for_select( (0..100).to_a), "tcs_id" => @advance.id, :prompt => "----"
-  %tr
-    %td
-      = submit_tag "Calificar"
-
-
+-if @access
+  = form_tag "/calificar/avance/#{@advance.id}/set",:remote =>true, :id=>"advance-grades-form", :name=>"advance-grades-form"
+  %table.tc-students
+    %tr
+      %td
+        %p=@advance.student.full_name
+        %p=@advance.title
+        %p=@advance.student.program.name
+    %tr
+      %td
+        = select_tag "grade_#{@advance.id}", options_for_select( (0..100).to_a), "tcs_id" => @advance.id, :prompt => "----"
+    %tr
+      %td
+        = submit_tag "Calificar"
+-else
+  = "Usted no es tutor en este avance"
