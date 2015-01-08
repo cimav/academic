@@ -192,6 +192,7 @@ class StaffsController < ApplicationController
     @staff      = Staff.find(current_user.id)
     @advance    = Advance.find(params[:id])
 
+
     if @staff.id.to_i.eql? @advance.tutor1.to_i
       @access = true
     elsif @staff.id.to_i.eql? @advance.tutor2.to_i
