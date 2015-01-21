@@ -137,7 +137,7 @@ class StaffsController < ApplicationController
     @tc = @tc_r[0]
 
     if @tc_r.size > 0
-      @tcs = TermCourseStudent.where(:term_course_id=>@tc_id)
+      @tcs = TermCourseStudent.where(:term_course_id=>@tc_id,:status=>1)
     end
   end 
 
@@ -211,11 +211,30 @@ class StaffsController < ApplicationController
     errors_counter = 0
     errors_array = Array.new
     counter = 0
+    @advance = Advance.find(params[:id])
     @staff = Staff.find(current_user.id)
-    if errors_counter > 0
-      render_error @staff,"Error",parameters,errors_array
+
+    if @advance.tutor1.to_i.eql? @staff.id
+      @advance.grade1        = params[:grade_s].to_i
+      @advance.grade1_status = 1
+    elsif @advance.tutor2.to_i.eql? @staff.id
+      @advance.grade2        = params[:grade_s].to_i
+      @advance.grade2_status = 1
+    elsif @advance.tutor3.to_i.eql? @staff.id
+      @advance.grade3        = params[:grade_s].to_i
+      @advance.grade3_status = 1
+    elsif @advance.tutor4.to_i.eql? @staff.id
+      @advance.grade4        = params[:grade_s].to_i
+      @advance.grade4_status = 1
+    elsif @advance.tutor5.to_i.eql? @staff.id
+      @advance.grade5        = params[:grade_s].to_i
+      @advance.grade5_status = 1
+    end
+
+    if @advance.save
+      render_message @advance,"Calificaciones guardadas correctamente",parameters
     else
-      render_message @staff,"Calificaciones guardadas correctamente",parameters
+      render_error @advance,"Error al guardar calificaciones",parameters,errors_array
     end
   end
 

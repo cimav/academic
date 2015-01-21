@@ -2,6 +2,27 @@
 -if @access
   - advance = Advance.joins(:student=>[:term_students=>:term]).joins(:student=>:program).where("terms.status=? AND curdate() between terms.grade_start_date AND terms.grade_end_date AND advances.id=?",3,@advance.id)
   - if !advance.size.eql? 0
+    - disabled = false
+    - grade = nil
+    - if advance[0].tutor1.eql? @staff.id
+      - grade = advance[0].grade1
+      - disabled = true
+    - elsif advance[0].tutor2.eql? @staff.id
+      - grade = advance[0].grade2
+      - disabled = true
+    - elsif advance[0].tutor3.eql? @staff.id
+      - grade = advance[0].grade3
+      - disabled = true
+    - elsif advance[0].tutor4.eql? @staff.id
+      - grade = advance[0].grade4
+      - disabled = true
+    - elsif advance[0].tutor5.eql? @staff.id
+      - grade = advance[0].grade5
+      - disabled = true
+
+    - if grade.nil?
+      - disabled = false
+
     = form_tag "/calificar/avance/#{@advance.id}/set",:remote =>true, :id=>"advance-grades-form", :name=>"advance-grades-form"
     %table.tc-students
       %tr
@@ -11,10 +32,10 @@
           %p=@advance.student.program.name
       %tr
         %td
-          = select_tag "grade_#{@advance.id}", options_for_select( (0..100).to_a), "tcs_id" => @advance.id, :prompt => "----"
+          = select_tag "grade_s", options_for_select( (0..100).to_a, selected: grade), "tcs_id" => @advance.id, :prompt => "----", :disabled=>disabled
       %tr
         %td
-          = submit_tag "Calificar"
+          = submit_tag "Calificar", :disabled=>disabled
   - else
     = "No estamos en fechas de calificaciones"
 -else
