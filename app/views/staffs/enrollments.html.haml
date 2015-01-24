@@ -8,17 +8,46 @@
   - counter = 0
   - if @students.size > 0
     - @students.each do |s|
+      - ## obtener ultimo ciclo cursado
+      - last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>s.id}).order("terms.end_date desc").limit(1)[0]
+      - ## obtener ciclo de inscripcion
+      - @e_term    = Term.where("program_id=#{s.program.id} AND start_date  > '#{last_term.end_date}' AND start_date >= curdate() AND name like '%#{last_term.name.split(" ")[1]}%'").last
+      - if @e_term.nil?
+        - @e_term_name = "Ciclo no disponible"
+      - else
+        - @e_term_name = @e_term.name
+      - ## materias en estatus de preinscripcion
+      -# @e_courses = TermCourseStudent.joins(:term_student).where(:term_students=>{:student_id=>s.id,:term_id=>@e_term.id}).size rescue 0
+      - @e_courses = TermCourseStudent.joins(:term_student).where(:term_students=>{:student_id=>s.id},:status=>6).size rescue 0
+
       - counter = counter + 1
       %tr
-        %td.dia{:style=>'cursor:pointer;border:0px',:id=>s.id,:status=>s.status}
+        - access_status = 0
+        - if s.status.eql? 6 and !@e_term.nil?
+          - access_status = 1
+        - elsif s.status.eql? 6 and @e_courses>0
+          - access_status = 2
+        -# elsif s.status.eql? 6 and s.program.level.to_i.eql? 2 and !@e_term.nil?  ## acceso para los de doctorado sin materias
+          - access_status = 2
+        %td.dia{:style=>'cursor:pointer;border:0px',:id=>s.id,:status=>access_status}
           .session_block(class="session_style_#{counter}"){:id=>"sblock_#{s.id}"}
             .session-title
               = s.full_name
-              - if s.status.eql? 6
-                = image_tag "ok_40px.png", :id=> "img_ok_#{s.id}" ,:align=> 'right', :width=>'30px'
-              - else
-                = image_tag "fail_40px.png", :id=> "img_fail_#{s.id}" ,:align=> 'right', :width=>'30px'
-            .session-staff{:id=>"sstaff_#{s.id}"}= s.program.name
+              .session-alert
+                - if access_status.eql? 1
+                  %span{:id=>"text_#{s.id}"}= "[Elegir Materias]"
+                  %center
+                    = image_tag "fail_40px.png", :id=> "img_fail_#{s.id}" , :width=>'15px'
+                    = image_tag "ok_40px.png", :id=> "img_ok_#{s.id}" , :width=>'15px',:style=>'display: none '
+                - elsif access_status.eql? 2
+                  %span{:id=>"text_#{s.id}"}="[Materias Elegidas]"
+                  %br
+                  %center
+                    = image_tag "ok_40px.png", :id=> "img_ok_#{s.id}", :width=>'15px'
+                - else
+                  = "[Alumno Activo]"
+            .session-staff{:id=>"sstaff_#{s.id}"}= "#{s.program.name} [#{@e_term_name}]"
+            -#.session-staff{:id=>"sstaff_#{s.id}"}= "#{s.program.name} [#{@e_term_name}] #{@e_courses} #{s.status}"
           
   - else
     %tr

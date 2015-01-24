@@ -1,0 +1,77 @@
+- if @e_term.nil?
+  = "No hay ciclos abiertos para inscripción para ese programa, por favor de comunicarse al departamento de posgrado"
+  = hidden_field_tag 'hstatus', 0
+- else
+  %h2="Ciclo: #{@e_term.name}"
+  %h3="Materias para #{@e_term.program.name}:"
+  = form_for(@student, :remote=> true, :url => { :action => "assign_courses" }, :html => {:id => 'assign-courses-form'}) do |f|
+    = hidden_field_tag 'eterm', @e_term.id
+    = hidden_field_tag 's_id', @student.id
+    - counter = 1
+    - if @tcs.blank?
+      %p= "No hay grupos"
+    - else
+      %br
+      %table.formatted-table
+        %tbody
+          %tr.header
+            %th=""
+            %th="Materia"
+            %th="Ciclo"
+        - a_op = Array.new
+        - rcounter = @optativas.size
+        - @cs.each do |c|
+          - if (c.code.empty?)&&(c.name.include? "Optativa")
+            - if rcounter > 0
+              - rcounter = rcounter - 1
+            - else
+              - a_op << c.id 
+        - @tcs.each do |tc|
+          %tr
+          - if a_op.include?(tc.course.id) 
+            %td= ""
+          - else
+            %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
+          %td= "#{tc.course.name} [#{tc.term.name}]"
+          %td= tc.course.term 
+          - counter = counter + 1
+          %p
+ 
+      %p 
+        = "Las #{a_op.count} optativas se seleccionan de la lista siguiente:"
+ 
+      %br
+      %h3="Optativas para #{@tcs[0].term.program.name}:"
+      %table.formatted-table
+        %tbody
+          %tr.header
+            %th=""
+            %th="Materia"
+            %th="Ciclo"
+        - @optativasf.each do |tc|
+          %tr
+            %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
+            %td= "#{tc.course.name} [#{tc.term.name}]"
+            %td= tc.course.term 
+
+    - if @tcs2.blank?
+      %br
+      %p= "No hay grupos disponibles para el resto de los programas"
+    - else
+      - pp_name = ""
+      %h3="Materias para otros programas"
+      %table.formatted-table
+        %tbody
+          %tr.header
+            %th=""
+            %th="Materia"
+            %th="Programa"
+          - @tcs2.each do |tc|
+            %tr
+              %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
+              %td= "#{tc.course.name} [#{tc.term.name}]" 
+              %td= "#{tc.term.program.name}"
+            - counter = counter + 1
+    
+  = hidden_field_tag 'hstatus', 1
+  

@@ -1,0 +1,59 @@
+- if @e_term.nil?
+  = "No hay ciclos abiertos para inscripción para ese programa, por favor de comunicarse al departamento de posgrado"
+  = hidden_field_tag 'hstatus', 0
+- else
+  %p="Ciclo: #{@e_term.name}"
+  %p
+  - stc = TermCourse.joins(:term_course_student=>:term_student).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=?",70)
+  - maxterm  = stc.joins(:course).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=? AND courses.term!=?",70,99).maximum("courses.term")
+  - smaxterm = [maxterm,maxterm+1,99]
+  - scourses = stc.map{|i| i.course_id}
+  = form_for(@student, :remote=> true, :url => { :action => "assign_courses" }, :html => {:id => 'assign-courses-form'}) do |f|
+    -# tcs = TermCourse.joins(:term=>:program).joins(:course).where(:courses=>{:studies_plan_id=>@student.studies_plan_id},:programs=>{:id=>@student.program.id},:terms=>{:status=>1}).where("terms.id=? AND courses.id not in (?) AND courses.term in (?)",@e_term.id,scourses,smaxterm).order("courses.program_id") 
+    - tcs = TermCourse.joins(:term=>:program).joins(:course).where(:courses=>{:studies_plan_id=>@student.studies_plan_id},:programs=>{:id=>@student.program.id},:terms=>{:status=>1}).where("terms.id=? AND courses.id not in (?) AND courses.term<=?",@e_term.id,scourses,maxterm+1).order("courses.program_id") 
+    - scourses += tcs.map {|i| i.course_id}
+    - tcs2 = TermCourse.joins(:term=>:program).joins(:course).where(:programs=>{:level=>@student.program.level},:terms=>{:status=>1}).where("courses.id not in (?) AND courses.program_id !=?",scourses,@student.program.id).order("courses.program_id") 
+    - counter = 1
+    - if tcs.blank?
+      %p= "No hay grupos para ese ciclo"
+    - else
+      %br
+      %p="Materias para #{tcs[0].term.program.name}:"
+      - tcs.each do |tc|
+        = check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
+        = "#{tc.course.name} #{tc.term.name} #{tc.course.term}"
+        - counter = counter + 1
+        %br
+    - if tcs2.blank?
+      %br
+      %p= "No hay grupos disponibles para el resto de los programas"
+    - else
+      - pp_name = ""
+      - tcs2.each do |tc|
+        - if pp_name != tc.term.program.name
+          %br
+          %p="Materias para #{tc.term.program.name}:"
+          - pp_name = tc.term.program.name
+        = check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
+        = "#{tc.course.name} #{tc.term.name}"
+        - counter = counter + 1
+        %br
+
+
+    - scourses = TermCourse.joins(:term_course_student=>:term_student).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=?",70).map {|i| i.course_id}
+    - cs = Course.where("program_id=? AND term<=? AND id not in (?)",@student.program.id,maxterm+1,scourses)
+    - optativas = TermCourse.joins(:term_course_student=>:term_student).joins(:course).where("term_students.student_id=? AND courses.program_id=? AND term_course_students.grade>=? AND courses.term=?",@student.id,@student.program.id,70,99).size
+    - rcounter = optativas
+    %p= "Materias Optativas #{optativas}"
+    - cs.each do |c|
+      - if (c.code.empty?)&&(c.name.include? "Optativa")
+        - if rcounter > 0
+          - rcounter = rcounter - 1
+        - else
+          = "#{c.name} <--Optativa!!!"
+      - else
+        = c.name
+      %br
+    
+  = hidden_field_tag 'hstatus', 1
+  

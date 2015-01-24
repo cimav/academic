@@ -50,6 +50,10 @@
           - if @screen=="grades"
             = image_tag "/assets/left-arrow-blue.png"
           %br
+          %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
+          - if @screen=="enrollments"
+            = image_tag "/assets/left-arrow-blue.png"
+          %br
       #content
         = yield
 
