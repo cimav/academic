@@ -51,7 +51,6 @@ class StudentsController < ApplicationController
     @message  = ""
     @errors   = []
     @none  = params[:chk_none]
-    #@errors   << 1
     #@errors   << 3
     ## primero pre-inscribimos al alumno al ciclo
     @ts = TermStudent.new
@@ -59,12 +58,10 @@ class StudentsController < ApplicationController
     @ts.student_id = params[:s_id] 
     @ts.status     = 6
     if @ts.save 
-      if @none.to_i.eql? 1
-          @message= "Todo OK"
-      else
+      if @none.nil?
       ## Ahora inscribimos a los cursos
         params[:tcourses].each do |tc|
-          @errors << tc.to_s
+          #@errors << tc.to_s
           @tcs = TermCourseStudent.new
           @tcs.term_course_id  = tc
           @tcs.term_student_id = @ts.id
@@ -83,6 +80,8 @@ class StudentsController < ApplicationController
             @errors << tc
           end#if
         end#params
+      else
+        @message="todo ok"
       end#if none
     else
       @message= "No se pudo inscribir al ciclo"

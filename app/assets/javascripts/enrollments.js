@@ -82,7 +82,7 @@ $(document).ready(function() {
         $('#'+res['s_id']).attr('status',0);
         
       }else{
-        alert("Se presentaron los siguientes errores: "+errs)
+        alert("Se presentaron los siguientes errores: "+res['message']+"("+errs+")")
       }
 
       /*var errs = $.map(res['errors'],function(value,index){
