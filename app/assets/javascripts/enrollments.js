@@ -51,6 +51,7 @@ $(document).ready(function() {
   $('#assign-courses-form')
     .live("ajax:beforeSend",function(evt,xht,settings){
       checks      = $("input[name='tcourses[]']:checked").length
+      none        = $("#chk_none").prop("checked")
 
       if(none==true){
         return true
