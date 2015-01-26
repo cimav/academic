@@ -50,13 +50,19 @@ $(document).ready(function() {
 
   $('#assign-courses-form')
     .live("ajax:beforeSend",function(evt,xht,settings){
-      checks = $("input[name='tcourses[]']:checked").length
-      if(checks>0){
-        return true;
+      checks      = $("input[name='tcourses[]']:checked").length
+
+      if(none==true){
+        return true
       }
       else{
-        alert("Tiene que elegir materias");
-        return false;
+        if(checks>0){
+          return true;
+        }
+        else{
+          alert("Tiene que elegir materias");
+          return false;
+        }
       }
     })
     .live("ajax:error", function(data, status) {

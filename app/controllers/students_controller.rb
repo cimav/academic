@@ -48,8 +48,9 @@ class StudentsController < ApplicationController
 
   def assign_courses
     json = {}
-    @message = ""
+    @message  = ""
     @errors   = []
+    @none  = params[:chk_none]
     #@errors   << 1
     #@errors   << 3
     ## primero pre-inscribimos al alumno al ciclo
@@ -58,26 +59,31 @@ class StudentsController < ApplicationController
     @ts.student_id = params[:s_id] 
     @ts.status     = 6
     if @ts.save 
-      ## Ahora inscribimos a los cursos
-      params[:tcourses].each do |tc|
-        @tcs = TermCourseStudent.new
-        @tcs.term_course_id  = tc
-        @tcs.term_student_id = @ts.id
-        @tcs.status          = 6
-        if @tcs.save
+      if @none.to_i.eql? 1
           @message= "Todo OK"
-          ## Enviamos mail al alumno (ponemos en la cola de correos el mensaje)
-          s = Student.find(params[:s_id])
-          to = s.email_cimav
-          content = "{:full_name=>\"#{s.full_name}\",:s_id=>\"#{s.id}\",:view=>5}"
-          subject = "Ya estan listas sus materias para inscripción"
-          mail    = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>to,:subject=>subject,:content=>content,:status=>0})
-          mail.save
-        else
-          @message= "No se pudo inscribir a las materias"
-          @errors << tc
-        end
-      end
+      else
+      ## Ahora inscribimos a los cursos
+        params[:tcourses].each do |tc|
+          @errors << tc.to_s
+          @tcs = TermCourseStudent.new
+          @tcs.term_course_id  = tc
+          @tcs.term_student_id = @ts.id
+          @tcs.status          = 6
+          if @tcs.save
+            @message= "Todo OK"
+            ## Enviamos mail al alumno (ponemos en la cola de correos el mensaje)
+            s = Student.find(params[:s_id])
+            to = s.email_cimav
+            content = "{:full_name=>\"#{s.full_name}\",:s_id=>\"#{s.id}\",:view=>5}"
+            subject = "Ya estan listas sus materias para inscripción"
+            mail    = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>to,:subject=>subject,:content=>content,:status=>0})
+            mail.save
+          else
+            @message= "No se pudo inscribir a las materias"
+            @errors << tc
+          end#if
+        end#params
+      end#if none
     else
       @message= "No se pudo inscribir al ciclo"
       @errors  << 1 

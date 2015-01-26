@@ -7,6 +7,12 @@
   = form_for(@student, :remote=> true, :url => { :action => "assign_courses" }, :html => {:id => 'assign-courses-form'}) do |f|
     = hidden_field_tag 'eterm', @e_term.id
     = hidden_field_tag 's_id', @student.id
+    - if @student.program.level.to_i.eql? 2
+      %table.formatted-table
+        %tbody
+          %tr
+            %td= check_box_tag "chk_none", 1, false
+            %td= "Pre-inscribir sin materias (no se enviara ninguna materia)"
     - counter = 1
     - if @tcs.blank?
       %p= "No hay grupos"
