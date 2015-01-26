@@ -25,7 +25,7 @@ class StudentsController < ApplicationController
     @scourses += @tcs.map {|i| i.course_id}
  
     ## Obtenemos todos los cursos para el resto de los programas
-    @tcs2 = TermCourse.joins(:term=>:program).joins(:course).where(:programs=>{:level=>@student.program.level},:terms=>{:status=>1}).where("courses.id not in (?) AND courses.program_id !=?",@scourses,@student.program.id).order("courses.program_id") 
+    @tcs2 = TermCourse.joins(:term=>:program).joins(:course).where(:programs=>{:level=>[1,2]},:terms=>{:status=>1}).where("courses.id not in (?) AND courses.program_id !=?",@scourses,@student.program.id).order("courses.program_id") 
     
     ## OPTATIVAS
     ## Obtenemos de nuevo los cursos acreditados
