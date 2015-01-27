@@ -9,9 +9,12 @@
   - if @students.size > 0
     - @students.each do |s|
       - ## obtener ultimo ciclo cursado
-      - last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>s.id}).order("terms.end_date desc").limit(1)[0]
+      - last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>s.id}).order("terms.end_date desc").limit(1)[0] 
       - ## obtener ciclo de inscripcion
-      - @e_term    = Term.where("program_id=#{s.program.id} AND start_date  > '#{last_term.end_date}' AND start_date >= curdate() AND name like '%#{last_term.name.split(" ")[1]}%'").last
+      - if last_term.nil?
+        - @e_term = nil
+      - else
+        - @e_term    = Term.where("program_id=#{s.program.id} AND start_date  > '#{last_term.end_date}' AND start_date >= curdate() AND name like '%#{last_term.name.split(" ")[1]}%'").last
       - if @e_term.nil?
         - @e_term_name = "Ciclo no disponible"
       - else
