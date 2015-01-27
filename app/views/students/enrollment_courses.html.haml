@@ -7,7 +7,8 @@
   = form_for(@student, :remote=> true, :url => { :action => "assign_courses" }, :html => {:id => 'assign-courses-form'}) do |f|
     = hidden_field_tag 'eterm', @e_term.id
     = hidden_field_tag 's_id', @student.id
-    - if @student.program.level.to_i.eql? 2
+
+    - if @without_courses
       = check_box_tag "chk_none", 1, false, :name=>"chk_none"
       = "Pre-inscribir sin materias (no se enviara ninguna materia)"
     - counter = 1

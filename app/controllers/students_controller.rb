@@ -39,6 +39,18 @@ class StudentsController < ApplicationController
     @soptativas << 0
     @optativasf = TermCourse.joins(:course).where("courses.program_id=? AND courses.id not in (?) AND courses.term=? AND term_id=?",@student.program.id,@soptativas,99,@e_term.id)
 
+    ## asisgnando permisos para inscribir sin materias
+    @without_courses = false
+    if @student.program.level.to_i.eql? 2 ## los de doctorado
+      @without_courses = true
+    elsif @student.program.level.to_i.eql? 1 ## los de maestria con una materia de tesis calificada
+      t = TermCourse.joins(:term_course_student=>:term_student).joins(:course).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=? AND courses.notes='[AI]'",70)
+      if t.size>0
+        @without_courses = true
+      end
+    end
+
+
     respond_to do |format|
       format.html do
         render :layout=> false
