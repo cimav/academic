@@ -13,7 +13,7 @@
       = "Pre-inscribir sin materias (no se enviara ninguna materia)"
     - counter = 1
     - if @tcs.blank?
-      %p= "No hay grupos"
+      %p= "No hay grupos #{@smaxterm}"
     - else
       %br
       %table.formatted-table
@@ -41,22 +41,22 @@
           - counter = counter + 1
           %p
  
-      %p 
-        = "Las #{a_op.count} optativas se seleccionan de la lista siguiente:"
- 
-      %br
-      %h3="Optativas para #{@tcs[0].term.program.name}:"
-      %table.formatted-table
-        %tbody
-          %tr.header
-            %th=""
-            %th="Materia"
-            %th="Ciclo"
-        - @optativasf.each do |tc|
-          %tr
-            %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
-            %td= "#{tc.course.name} [#{tc.term.name}]"
-            %td= tc.course.term 
+    %p 
+      = "Las optativas se seleccionan de la lista siguiente:"
+
+    %br
+    %h3="Optativas para #{@e_term.program.name}:"
+    %table.formatted-table
+      %tbody
+        %tr.header
+          %th=""
+          %th="Materia"
+          %th="Ciclo"
+      - @optativasf.each do |tc|
+        %tr
+          %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
+          %td= "#{tc.course.name} [#{tc.term.name}]"
+          %td= "Optativa"
 
     - if @tcs2.blank?
       %br
