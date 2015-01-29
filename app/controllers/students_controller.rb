@@ -10,13 +10,45 @@ class StudentsController < ApplicationController
     ## get enrollment term
     @e_term    = Term.where("program_id=#{@student.program.id} AND start_date  > '#{last_term.end_date}' AND name like '%#{last_term.name.split(" ")[1]}%'").last
     ## Obtenemos las materias que ya lleva acreditadas el alumno
-    @stc = TermCourse.joins(:term_course_student=>:term_student).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=?",70)
-    ## Obtenemos la lista de los ciclos a los que pertenecen los cursos aprobados y seleccionamos el ultimo, este es el semestre al que pertenece el alumno
-    @maxterm  = @stc.joins(:course).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=? AND courses.term!=?",70,99).maximum("courses.term")
+    @stc = TermCourse.joins(:term_course_student=>:term_student).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=? AND term_course_students.status=?",70,1)
+    @scourses = @stc.map{|i| i.course_id}
+
+    ## Nos traemos el plan de estudios
+    @plan_estudios        = Course.where(:program_id=>@student.program.id,:studies_plan_id=>@student.studies_plan_id).where("term!=99").order(:term)
+    @optativas_requeridas = Course.where(:program_id=>@student.program.id,:studies_plan_id=>@student.studies_plan_id).where("term!=99 AND courses.name like '%Optativa%'").size
+    @optativas_cursadas   = @stc.joins(:course).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=? AND courses.term=?",70,99).size
+    @alternativas_cursadas   = @stc.joins(:course).where(:term_students=>{:student_id=>@student.id}).where("term_course_students.grade>=? AND courses.term!=? AND courses.program_id!=?",70,99,@student.program.id).size
+    @optativas_total = @optativas_cursadas + @alternativas_cursadas
+    @materias_faltantes = []
+    @plan_estudios.each do |c|
+       logger.debug "PLAN: #{c.name}" 
+       if !@scourses.include? c.id
+         if c.name.include? "Optativa"
+           if @optativas_total>0
+             @optativas_total = @optativas_total - 1
+           else
+             @materias_faltantes << c
+           end
+         else
+           @materias_faltantes << c
+         end
+       end
+    end
+
+    @materias_faltantes.each do |mf|
+      logger.debug "FALTAN: #{mf.name}"
+      @maxterm = mf.term
+    end
+
+    if @materias_faltantes.size>0
+      logger.debug "PRIMER REGISTRO:  #{@materias_faltantes[0].name}"
+      @maxterm = @materias_faltantes[0].term - 1
+    else
+      @maxterm = @plan_estudios.maximum(:term) 
+    end
+
     ## Almacenamos en un arreglo los ciclos
     @smaxterm = [@maxterm,@maxterm+1,99]
-    ## Almacenamos en un mapa los cursos acreditados por id
-    @scourses = @stc.map{|i| i.course_id}
     
     ## Nos traemos los cursos que no han sido aprobados, es decir, que no estan en scourses y >>
     ## los que estan en el semestre al que pertence el alumno mas uno.
