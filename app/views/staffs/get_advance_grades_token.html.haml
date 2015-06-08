@@ -1,6 +1,9 @@
 %h2="Calificaciones (avance programatico)"
--if @access
-  - advance = Advance.joins(:student=>[:term_students=>:term]).joins(:student=>:program).where("terms.status=? AND curdate() between terms.grade_start_date AND terms.grade_end_date AND advances.id=?",3,@advance.id)
+- if 1.eql? 2
+  = "Nevermore"
+- else
+  -# advance = Advance.joins(:student=>[:term_students=>:term]).joins(:student=>:program).where("terms.status=? AND curdate() between terms.grade_start_date AND terms.grade_end_date AND advances.id=?",3,@advance.id)
+  - advance = Advance.joins(:student=>[:term_students=>:term]).joins(:student=>:program).where("advances.id=?",@advance.id)
   - if !advance.size.eql? 0
     - disabled = false
     - grade = nil
@@ -22,8 +25,8 @@
 
     - if grade.nil?
       - disabled = false
-
-    = form_tag "/calificar/avance/#{@advance.id}/set",:remote =>true, :id=>"advance-grades-form", :name=>"advance-grades-form"
+  
+    = form_tag "/calificar/avance/#{@advance.id}/#{@token[0].token}/set",:remote =>true, :id=>"advance-grades-form", :name=>"advance-grades-form"
     %table.tc-students
       %tr
         %td
@@ -54,10 +57,7 @@
           = text_field_tag "comments", nil, :disabled=>disabled, :size=>105
       %tr
         %td
+          = hidden_field_tag 'token',@token[0].token
           = submit_tag "Calificar", :disabled=>disabled
-          - if disabled
-            = "Usted ya ha calificado"
   - else
     = "No estamos en fechas de calificaciones"
--else
-  = "Usted no es tutor en este avance"

@@ -1,0 +1,15 @@
+!!!
+%html
+  %head
+    %title= @page_title || 'Académicos CIMAV'
+    = stylesheet_link_tag "custom-theme/jquery-ui"
+    = stylesheet_link_tag "application"
+    /[if lt IE 8]
+    = javascript_include_tag "application"
+    - if !@include_js.nil?
+      - @include_js.each do |js|
+        = javascript_include_tag js
+    = csrf_meta_tag
+  %body
+    #standalone-content
+      = yield

@@ -116,7 +116,7 @@ class StaffsController < ApplicationController
 
     @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, @today, @today)
 
-    @advances = Advance.joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("terms.start_date<=:today AND terms.end_date>=:today AND terms.start_date<=advances.advance_date AND terms.end_date>=advances.advance_date AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:today=>Date.today,:id=>1,:level=>[1,2])
+    @advances = Advance.joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2])
 
     respond_with do |format|
       format.html do
@@ -183,15 +183,60 @@ class StaffsController < ApplicationController
       render_message @staff,"Calificaciones guardadas correctamente",parameters
     end
   end
+
+  def get_advance_grades_token
+    @include_js = ["grades"]
+    @access     = false
+    @token      = Token.where(:token=>params[:token])
+    if @token[0].nil?
+      render file: "#{Rails.root}/public/404.html", layout: false, status: 404
+      return
+    end
+    
+    @staff      = Staff.find(@token[0].attachable_id)
+    @advance    = Advance.find(params[:id])
+
+    @advances    = Advance.where(:student_id=>@advance.student_id, :status=>'C').order("advance_date")
+    
+    if @staff.id.to_i.eql? @advance.tutor1.to_i
+      if !@advance.grade1_status.eql? 1
+        @access = true
+      end
+    elsif @staff.id.to_i.eql? @advance.tutor2.to_i
+      if !@advance.grade2_status.eql? 1
+        @access = true
+      end
+    elsif @staff.id.to_i.eql? @advance.tutor3.to_i
+      if !@advance.grade3_status.eql? 1
+        @access = true
+      end
+    elsif @staff.id.to_i.eql? @advance.tutor4.to_i
+      if !@advance.grade4_status.eql? 1
+        @access = true
+      end
+    elsif @staff.id.to_i.eql? @advance.tutor5.to_i
+      if !@advance.grade5_status.eql? 1
+        @access = true
+      end
+    end
+
+    if !@access
+      render file: "#{Rails.root}/public/404.html", layout: false, status: 404
+      return
+    end
+
+    render :layout => 'standalone'
+  end
   
   def get_advance_grades
-    @include_js =  ["grades"]
+    @include_js = ["grades"] 
     @screen     = "grades"
     @access     = false
     
     @staff      = Staff.find(current_user.id)
     @advance    = Advance.find(params[:id])
-
+    
+    @advances    = Advance.where(:student_id=>@advance.student_id, :status=>'C').order("advance_date")
 
     if @staff.id.to_i.eql? @advance.tutor1.to_i
       @access = true
@@ -205,6 +250,40 @@ class StaffsController < ApplicationController
       @access = true
     end
   end
+  
+  def set_advance_grades_token
+    parameters = {}
+    errors_counter = 0
+    errors_array = Array.new
+    counter = 0
+    @advance = Advance.find(params[:id])
+    @token   = Token.where(:token=>params[:token])
+    @staff   = Staff.find(@token[0].attachable_id)
+    if @advance.tutor1.to_i.eql? @staff.id
+      @advance.grade1        = params[:grade_s].to_i
+      @advance.grade1_status = 1
+    elsif @advance.tutor2.to_i.eql? @staff.id
+      @advance.grade2        = params[:grade_s].to_i
+      @advance.grade2_status = 1
+    elsif @advance.tutor3.to_i.eql? @staff.id
+      @advance.grade3        = params[:grade_s].to_i
+      @advance.grade3_status = 1
+    elsif @advance.tutor4.to_i.eql? @staff.id
+      @advance.grade4        = params[:grade_s].to_i
+      @advance.grade4_status = 1
+    elsif @advance.tutor5.to_i.eql? @staff.id
+      @advance.grade5        = params[:grade_s].to_i
+      @advance.grade5_status = 1
+    end
+    
+    @advance.notes = "#{@advance.notes}\n#{params[:comments]} - #{@staff.title} #{@staff.full_name}"
+    
+    if @advance.save
+      render_message @advance,"Calificaciones guardadas correctamente",parameters
+    else
+      render_error @advance,"Error al guardar calificaciones",parameters,errors_array
+    end
+  end
 
   def set_advance_grades
     parameters = {}
@@ -212,7 +291,7 @@ class StaffsController < ApplicationController
     errors_array = Array.new
     counter = 0
     @advance = Advance.find(params[:id])
-    @staff = Staff.find(current_user.id)
+    @staff   = Staff.find(current_user.id)
 
     if @advance.tutor1.to_i.eql? @staff.id
       @advance.grade1        = params[:grade_s].to_i
@@ -230,6 +309,8 @@ class StaffsController < ApplicationController
       @advance.grade5        = params[:grade_s].to_i
       @advance.grade5_status = 1
     end
+
+    @advance.notes = "#{@advance.notes}\n#{params[:comments]} - #{@staff.title} #{@staff.full_name}"
 
     if @advance.save
       render_message @advance,"Calificaciones guardadas correctamente",parameters

@@ -21,16 +21,23 @@ $(document).ready(function(){
 
   $("#advance-grades-form")
     .bind("ajax:beforeSend",function(evt,xhr,settings){
+      var comment = $('#comments').val();
+      if(comment==''){
+        alert("Debe escribir un comentario");
+        return false;
+      }
+
       $(this).find('input[type="submit"]').attr("disabled","disabled");
+      $(this).find('input[type="text"]').attr("disabled","disabled");
       $(this).find('select').attr("disabled","disabled");
     })
     .bind("ajax:success",function(evt,data,status,xhr){
       var r = $.parseJSON(xhr.responseText)
-      showMessage(r.flash.notice);
+      alert(r.flash.notice);
     })
     .bind("ajax:error",function(evt,xhr,status,error){
       var r = $.parseJSON(xhr.responseText)
-      showMessage(r.flash.error,r.errors);
+      alert("Error: " + r.flash.error);
       $(this).find('input[type="submit"]').removeAttr("disabled")
     });
 
