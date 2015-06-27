@@ -22,13 +22,19 @@ $(document).ready(function(){
   $("#advance-grades-form")
     .bind("ajax:beforeSend",function(evt,xhr,settings){
       var comment = $('#comments').val();
+      var grade   = $('#grade_s').val();
+      if(grade==''){ 
+        alert("Debe elegir una calificacion");
+        return false;
+      }
+ 
       if(comment==''){
         alert("Debe escribir un comentario");
         return false;
       }
 
       $(this).find('input[type="submit"]').attr("disabled","disabled");
-      $(this).find('input[type="text"]').attr("disabled","disabled");
+      $(this).find('textarea').attr("disabled","disabled");
       $(this).find('select').attr("disabled","disabled");
     })
     .bind("ajax:success",function(evt,data,status,xhr){

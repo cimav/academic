@@ -54,7 +54,8 @@
       %tr
         %td
           = "Comentarios de la evaluación:"
-          = text_field_tag "comments", nil, :disabled=>disabled, :size=>105
+          %br
+          = text_area_tag "comments", nil, :size=>"105x10", :disabled=>disabled
       %tr
         %td
           = hidden_field_tag 'token',@token[0].token

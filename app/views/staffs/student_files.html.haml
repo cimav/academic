@@ -93,6 +93,19 @@
     });
   });
 
+= "Comentarios del comite tutoral:"
+%br
+- if @advance.nil?
+  = "" 
+- else
+  %pre= @advance.notes
+%br
+= "Calificación del comite tutoral: "
+- if @avg.nil?
+  = ""
+- else
+  = @avg
+
 - if @student_advances_files.size == 0
   %div{'id'=>"student_advances_file_zero"}
     = "No se han subido archivos"

@@ -10,7 +10,7 @@
         %th Inicio
         %th Co-Asesor
         %th Avances
-      - @staff.supervised.where(:status => Student::ACTIVE).order("start_date").each_with_index do |supervised, index|    
+      - @staff.supervised.where(:status => [Student::ACTIVE,Student::PENROLLMENT]).order("start_date").each_with_index do |supervised, index|    
         %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
           %td= supervised.full_name
           %td= supervised.program.name

@@ -132,6 +132,13 @@ class StudentsController < ApplicationController
         end#params
       else
         @message="todo ok"
+        ## Enviamos mail al alumno (ponemos en la cola de correos el mensaje)
+        s = Student.find(params[:s_id])
+        to = s.email_cimav
+        content = "{:full_name=>\"#{s.full_name}\",:s_id=>\"#{s.id}\",:view=>5}"
+        subject = "Ya estan listas sus materias para inscripción"
+        mail    = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>to,:subject=>subject,:content=>content,:status=>0})
+        mail.save
       end#if none
     else
       @message= "No se pudo inscribir al ciclo"

@@ -36,8 +36,12 @@
             %td= ""
           - else
             %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
-          %td= "#{tc.course.name} [#{tc.term.name}]"
-          %td= tc.course.term 
+          %td
+            %span{:style=>"font-weight: bold; font-size:12px;"}= "#{tc.course.name} [#{tc.term.name}]" 
+            %br
+            %span{:style=>"font-weight: bold;font-size:12px;color:#757575;"}= tc.staff.full_name rescue "Docente sin asignar"
+          %td
+            %span{:Style=>"font-size:12px;"}= "#{tc.course.term}"
           - counter = counter + 1
           %p
  
@@ -55,8 +59,12 @@
       - @optativasf.each do |tc|
         %tr
           %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
-          %td= "#{tc.course.name} [#{tc.term.name}]"
-          %td= "Optativa"
+          %td
+            %span{:style=>"font-weight: bold; font-size:12px;"}= "#{tc.course.name} [#{tc.term.name}]" 
+            %br
+            %span{:style=>"font-weight: bold;font-size:12px;color:#757575;"}= tc.staff.full_name rescue "Docente sin asignar"
+          %td
+            %span{:Style=>"font-size:12px;"}= "Optativa"
 
     - if @tcs2.blank?
       %br
@@ -73,8 +81,12 @@
           - @tcs2.each do |tc|
             %tr
               %td= check_box_tag "chk_#{counter}", tc.id, false, :name=>"tcourses[]"
-              %td= "#{tc.course.name} [#{tc.term.name}]" 
-              %td= "#{tc.term.program.name}"
+              %td
+                %span{:style=>"font-weight: bold; font-size:12px;"}= "#{tc.course.name} [#{tc.term.name}]" 
+                %br
+                %span{:style=>"font-weight: bold;font-size:12px;color:#757575;"}= tc.staff.full_name rescue "Docente sin asignar"
+              %td
+                %span{:Style=>"font-size:12px;"}= "#{tc.term.program.name}"
             - counter = counter + 1
     
   = hidden_field_tag 'hstatus', 1

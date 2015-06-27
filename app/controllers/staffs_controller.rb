@@ -1,6 +1,9 @@
 class StaffsController < ApplicationController
   #load_and_authorize_resource
-  before_filter :auth_required
+  #before_filter :auth_required
+  before_filter :auth_required, :except=>[:get_advance_grades_token,:set_advance_grades_token,:get_advance_file_token]
+  #http_basic_authenticate_with name: "dhh", password: "secret", only: :get_advance_grades_token
+
   respond_to :html, :xml, :json
 
   def schedule_table
@@ -98,8 +101,18 @@ class StaffsController < ApplicationController
  
   def student_files
     @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
-    @screen="students"
-    @staff = Staff.find(current_user.id)
+    if !@student_advances_files.size.eql? 0
+      saf = @student_advances_files[0]
+      if !saf.nil? 
+        ts = TermStudent.find(saf.term_student_id)
+        t  = ts.term
+        advances = Advance.where("advances.student_id=? AND advances.status='C' AND advances.advance_date between ? and ?",ts.student.id,t.start_date,t.end_date).order("advance_date")
+        @advance = advances[0]
+        @avg     = get_adv_avg(@advance)
+      end
+    end
+    @screen = "students"
+    @staff  = Staff.find(current_user.id)
     render :layout => false
   end
 
@@ -183,6 +196,22 @@ class StaffsController < ApplicationController
       render_message @staff,"Calificaciones guardadas correctamente",parameters
     end
   end
+
+  def get_advance_file_token
+    @token     = Token.where(:token=>params[:token]).where("DATE_ADD(CURDATE(), INTERVAL 1 DAY) between created_at AND expires")
+    if @token[0].nil?
+      render file: "#{Rails.root}/public/404.html", layout: false, status: 404
+      return
+    end
+
+    a  = Advance.find(params[:id])
+    ts = a.student.term_students.last
+    sf = StudentAdvancesFiles.where(:term_student_id=>ts.id).last
+    
+    sf = StudentAdvancesFiles.find(sf.id).file
+    send_file sf.to_s, :x_sendfile=>true
+  end
+
 
   def get_advance_grades_token
     @include_js = ["grades"]
@@ -276,7 +305,11 @@ class StaffsController < ApplicationController
       @advance.grade5_status = 1
     end
     
-    @advance.notes = "#{@advance.notes}\n#{params[:comments]} - #{@staff.title} #{@staff.full_name}"
+    if @advance.notes.blank?
+      @advance.notes = params[:comments]
+    else
+      @advance.notes = "#{@advance.notes}\n#{params[:comments]}"
+    end
     
     if @advance.save
       render_message @advance,"Calificaciones guardadas correctamente",parameters
@@ -310,7 +343,11 @@ class StaffsController < ApplicationController
       @advance.grade5_status = 1
     end
 
-    @advance.notes = "#{@advance.notes}\n#{params[:comments]} - #{@staff.title} #{@staff.full_name}"
+    if @advance.notes.blank?
+      @advance.notes = params[:comments]
+    else
+      @advance.notes = "#{@advance.notes}\n#{params[:comments]}"
+    end
 
     if @advance.save
       render_message @advance,"Calificaciones guardadas correctamente",parameters
@@ -333,4 +370,46 @@ class StaffsController < ApplicationController
     #@students = Student.where(supervisor: @staff.id, status: Student::PENROLLMENT)
     @students = Student.where(supervisor: @staff.id, status: [1,6])
   end
+
+  def get_adv_avg(a)
+    grades = 0
+    sum    = 0
+    if !a.tutor1.nil?
+      if !a.grade1.nil?
+         sum = sum + a.grade1
+         grades = grades + 1
+      end
+    end
+    if !a.tutor2.nil?
+      if !a.grade2.nil?
+         sum = sum + a.grade2
+         grades = grades + 1
+      end
+    end
+    if !a.tutor3.nil?
+      if !a.grade3.nil?
+         sum = sum + a.grade3
+         grades = grades + 1
+      end
+    end
+    if !a.tutor4.nil?
+      if !a.grade4.nil?
+         sum = sum + a.grade4
+         grades = grades + 1
+      end
+    end
+    if !a.tutor5.nil?
+      if !a.grade5.nil?
+         sum = sum + a.grade5
+         grades = grades + 1
+      end
+    end
+
+    if !grades.eql? 0
+      return sum / grades
+    else
+      return nil
+    end
+  end
+
 end
