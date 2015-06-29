@@ -108,7 +108,9 @@ class StaffsController < ApplicationController
         t  = ts.term
         advances = Advance.where("advances.student_id=? AND advances.status='C' AND advances.advance_date between ? and ?",ts.student.id,t.start_date,t.end_date).order("advance_date")
         @advance = advances[0]
-        @avg     = get_adv_avg(@advance)
+        if !@advance.nil?
+          @avg     = get_adv_avg(@advance)
+        end
       end
     end
     @screen = "students"
