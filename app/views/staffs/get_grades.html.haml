@@ -6,11 +6,14 @@
   %h3=@tc.course.name
   %br
 
+ 
   - if @tcs.size > 0
     #message-area-2{:style=>"display:none;"}
       %h4="Nota: Solo puede dar de alta una vez las calificaciones, si desea hacer una corrección deberá solicitarlo personalmente al departamento de posgrado"
     #message-area-3{:style=>"display:none;"}
       %h4="Usted ya ha cargado las calificaciones, cualquier modificación debera solicitarlo directamente al departamento de posgrado"
+    #message-area-4{:style=>"display:none;"}
+      %h4="Solo el comite tutoral del alumno puede calificar esta materia, podra ver la calificacion ponderada hasta el cierre del ciclo escolar."
     %br
     = form_tag "/calificar/#{@tc.id}/set",:remote =>true, :id=>"grades-form", :name=>"grades-form"
     %table.tc-students
@@ -27,17 +30,25 @@
             %td= tcs.term_student.student.card
             %td= tcs.term_student.student.full_name
             %td
+              - if @tc.course.notes.eql? "[AI]"
+                - @disabled_ai = true
+                - @disabled    = true
               = select_tag "grade_#{i}", options_for_select( (0..100).to_a, tcs.grade.to_s), "tcs_id" => tcs.id, :prompt => "----", :disabled=> @disabled
               = hidden_field_tag "tcs_id_#{i}", tcs.id
       %tr
         %td{:colspan=>"3"}
-          - if @disabled_counter > 0
+          - if @disabled_ai
             - @disabled_button= "disabled"
             :javascript
-              $("#message-area-3").show();
+              $("#message-area-4").show();
           - else
-            :javascript
-              $("#message-area-2").show();
+            - if @disabled_counter > 0
+              - @disabled_button= "disabled"
+              :javascript
+                $("#message-area-3").show();
+            - else
+              :javascript
+                $("#message-area-2").show();
   
           = submit_tag "Calificar",:disabled=> @disabled_button
           = image_tag "/images/ajax-load2.gif", :id => "img-load-grades", :alt=>"Loading...", :align=>"center",:width=>"20px",:style=>"display: none;"
