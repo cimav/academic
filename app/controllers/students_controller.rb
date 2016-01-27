@@ -64,7 +64,6 @@ class StudentsController < ApplicationController
 
     if @errors
       ## mandamos email al alumno
-      staff = Staff.find(@s.supervisor)
       if @action.to_i.eql? 1
         @view = 6
         @subject = "Inscripcion realizada de forma exitosa"
@@ -72,7 +71,7 @@ class StudentsController < ApplicationController
         @view = 7
         @subject = "Inscripcion rechazada por el director de tesis"
       end
-      to = staff.email_cimav
+      to = @s.email_cimav
       content = "{:view=>#{@view}}"
       subject = "#{@subject}"
       mail    = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>to,:subject=>subject,:content=>content,:status=>0})
