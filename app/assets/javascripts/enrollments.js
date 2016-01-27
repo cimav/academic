@@ -1,11 +1,12 @@
 $(document).ready(function() {
+  var button_pressed=false;
   $(".dia")
     .hover( function() {
         var my_id = $(this).attr('id')
         $("#sblock_"+my_id).css("background-color","white");
         $("#sstaff_"+my_id).css("background-color","white");
       },
-            function() { 
+            function() {
         var my_id = $(this).attr('id')
         $("#sblock_"+my_id).removeAttr("style");
         $("#sstaff_"+my_id).removeAttr("style");
@@ -14,10 +15,9 @@ $(document).ready(function() {
     .click(function(){
       my_id     = $(this).attr('id');
       my_status = $(this).attr('status');
-      
+
       if(my_status==1){
         $d     = $("#new-enrollment-dialog");
-        $("#nedCloseButton").click(function(){$d.dialog("close")});
         loadCourses(my_id,$d);
         $d.dialog("open");
         $(".ui-widget-overlay").css("position","absolute");
@@ -28,40 +28,60 @@ $(document).ready(function() {
         return false;
       }
     });
-    
-  $("#help_ico").click(function(){
-    d      = $("#help-dialog");
-    d.dialog("open");
+
+  $("#nedCloseButton").click(function(){$d.dialog("close")});
+
+  $('#nedSendButton').click(function () {
+    $("#haction").val("1");
+    button_pressed = $(this).attr("id");
+    $("#assign-courses-form").submit();
   });
 
-  $("#new-enrollment-dialog").dialog({ 
-    autoOpen: false, 
-    width: 640, 
-    height: 450, 
-    modal:true, 
+  $('#nedRefuseButton').click(function () {
+    $d1     = $("#textarea-dialog");
+    $d1.dialog("open");
+
+    $("#nedCloseButton1").click(function(){
+      $d1.dialog("close");
+      $("#nedCloseButton").removeAttr("disabled");
+      $("#nedSendButton").removeAttr("disabled");
+      $("#nedRefuseButton").removeAttr("disabled");
+    });
+
+    $("#nedRefuseButton1").click(function(){
+      $("#haction").val("2");
+      $("#refuse_area").val($("#refuse_area_first").val());
+      button_pressed = $(this).attr("id");
+      $("#assign-courses-form").submit();
+    });
+
+    $(".ui-widget-overlay").css("position","absolute");
+    $(".ui-widget-overlay").css("top","0");
+    $("#nedCloseButton").attr("disabled","disabled");
+    $("#nedSendButton").attr("disabled","disabled");
+    $("#nedRefuseButton").attr("disabled","disabled");
+
+   });
+
+  $("#new-enrollment-dialog").dialog({
+    autoOpen: false,
+    width: 640,
+    height: 450,
+    modal:true,
     dialogClass: "no-close",
   });
 
-  $("#help-dialog").dialog({
-    autoOpen: false,
-    width: 800,
-    height: 600,
-  });
 
   $('#assign-courses-form')
     .live("ajax:beforeSend",function(evt,xht,settings){
-      checks      = $("input[name='tcourses[]']:checked").length
-      none        = $("#chk_none").prop("checked")
-
-      if(none==true){
-        return true
-      }
-      else{
-        if(checks>0){
-          return true;
-        }
-        else{
-          alert("Tiene que elegir materias");
+      if(button_pressed=='nedRefuseButton1')
+      {
+        var area  = $("#refuse_area").val();
+        text = area.replace(/ /g,'')
+        if(!text)
+        {
+          alert("Debe capturar una razón");
+          $("#refuse_area").focus();
           return false;
         }
       }
@@ -69,18 +89,25 @@ $(document).ready(function() {
     .live("ajax:error", function(data, status) {
       console.log(data);
       console.log(status);
-    }) 
+    })
     .live('ajax:success', function(evt, data, status, xhr) {
       var res  = $.parseJSON(xhr.responseText);
       var errs = res['errors']
       if(errs.length==0){
         // TODO OK :3
+        $("#textarea-dialog").dialog("close");
         $("#new-enrollment-dialog").dialog("close");
-        $('#img_fail_'+res['s_id']).css("display","none");
-        $('#img_ok_'+res['s_id']).css("display","block");
-        $('#text_'+res['s_id']).html("[Materias Elegidas]");
-        $('#'+res['s_id']).attr('status',0);
-        
+        if(res.response==2)
+        {
+          $('#img_fail_'+res['s_id']).css("display","none");
+          $('#text_'+res['s_id']).html("[Esperando Materias]");
+          $('#'+res['s_id']).attr('status',0);
+        }else{
+          $('#img_fail_'+res['s_id']).css("display","none");
+          $('#img_ok_'+res['s_id']).css("display","block");
+          $('#text_'+res['s_id']).html("[Materias Elegidas]");
+          $('#'+res['s_id']).attr('status',0);
+        }
       }else{
         alert("Se presentaron los siguientes errores: "+res['message']+"("+errs+")")
       }
@@ -92,7 +119,7 @@ $(document).ready(function() {
 
   function loadCourses(my_id,$d)
   {
-    $.ajax({ 
+    $.ajax({
       url: "/alumnos/inscripcion/materias/"+my_id,
       type: "POST",
     })
@@ -101,14 +128,6 @@ $(document).ready(function() {
       })
       .fail(function() {
         $("#courses").html("Error al traer los cursos");
-      })
-     .always(function() {
-       hstatus = $('#hstatus').val()
-       if (hstatus == 1) {
-         $('#nedSendButton')
-           .removeAttr("disabled")
-           .click(function () {  $("#assign-courses-form").submit();  });
-       }
-     });
+      });
   }
 });

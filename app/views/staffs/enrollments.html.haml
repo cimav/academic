@@ -1,3 +1,5 @@
+- @nciclo = '2016-1'
+- @ciclo  = '2015-2'
 %h3
   ="Inscripciones  "
   ="&nbsp;&nbsp;".html_safe
@@ -8,27 +10,21 @@
   - counter = 0
   - if @students.size > 0
     - @students.each do |s|
-      - ## obtener ultimo ciclo cursado
-      - last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>s.id}).order("terms.end_date desc").limit(1)[0] 
-      - ## obtener ciclo de inscripcion
-      - if last_term.nil?
-        - @e_term = nil
-      - else
-        - @e_term    = Term.where("program_id=#{s.program.id} AND start_date  > '#{last_term.end_date}' AND start_date >= curdate() AND name like '%#{last_term.name.split(" ")[1]}%'").last
-      - if @e_term.nil?
-        - @e_term_name = "Ciclo no disponible"
-      - else
-        - @e_term_name = @e_term.name
-      - ## materias en estatus de preinscripcion
-      -# @e_courses = TermCourseStudent.joins(:term_student).where(:term_students=>{:student_id=>s.id,:term_id=>@e_term.id}).size rescue 0
-      - @e_courses = TermCourseStudent.joins(:term_student).where(:term_students=>{:student_id=>s.id},:status=>6).size rescue 0
-
       - counter = counter + 1
+      - ## obtener ultimo ciclo cursado
+      - last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>s.id}).order("terms.end_date desc").limit(1)[0]  rescue ""
+      - @e_term_name = last_term.name rescue "Ciclo no disponible"
       %tr
         - access_status = 0
-        - if s.status.eql? 6 and !@e_term.nil?
-          - access_status = 1
-        - elsif s.status.eql? 6 and @e_courses>0
+        - if s.status.eql? 6 and last_term.name[0..5].eql? @nciclo
+          - ts_status  = TermStudent.where(:term_id=>last_term.id,:student_id=>s.id)[0].status rescue 0
+          - if ts_status.eql? 7
+            - access_status = 3
+          - else
+            - access_status = 1
+        - elsif s.status.eql? 6
+          - access_status = 3
+        - elsif s.status.eql? 1
           - access_status = 2
         -# elsif s.status.eql? 6 and s.program.level.to_i.eql? 2 and !@e_term.nil?  ## acceso para los de doctorado sin materias
           - access_status = 2
@@ -38,20 +34,19 @@
               = s.full_name
               .session-alert
                 - if access_status.eql? 1
-                  %span{:id=>"text_#{s.id}"}= "[Elegir Materias]"
+                  %span{:id=>"text_#{s.id}"}= "[Verificar Materias]"
                   %center
                     = image_tag "fail_40px.png", :id=> "img_fail_#{s.id}" , :width=>'15px'
                     = image_tag "ok_40px.png", :id=> "img_ok_#{s.id}" , :width=>'15px',:style=>'display: none '
                 - elsif access_status.eql? 2
-                  %span{:id=>"text_#{s.id}"}="[Materias Elegidas]"
-                  %br
-                  %center
-                    = image_tag "ok_40px.png", :id=> "img_ok_#{s.id}", :width=>'15px'
-                - else
                   = "[Alumno Activo]"
+                - elsif access_status.eql? 3
+                  = "[Esperando materias]"
+                - else
+                  = "[Estatus desconocido]"
             .session-staff{:id=>"sstaff_#{s.id}"}= "#{s.program.name} [#{@e_term_name}]"
             -#.session-staff{:id=>"sstaff_#{s.id}"}= "#{s.program.name} [#{@e_term_name}] #{@e_courses} #{s.status}"
-          
+
   - else
     %tr
       %td.dia= "No hay alumnos para inscripción"
@@ -62,6 +57,6 @@
   #courses
     = image_tag "ajax-load2.gif", :id=> "img-loader",:align=>:center,:valign=>:center
   #buttons
-    = submit_tag "Enviar materias", :id=>"nedSendButton",:align=>:center,:disabled=>:disabled
     = button_tag "Cerrar", :disable_with => "Enviando..." , :id=>"nedCloseButton", :class=>"message-button"
-#help-dialog
+    = submit_tag "Inscribir", :id=>"nedSendButton",:align=>:center
+    = submit_tag "Rechazar", :id=>"nedRefuseButton"
