@@ -71,6 +71,13 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def get_month_name(number)
+    months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+    name = months[number - 1]
+    return name
+  end 
+
+
   private
   def current_user
     @current_user ||= Staff.find(session[:user_id]) if session[:user_id]

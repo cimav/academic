@@ -24,7 +24,7 @@
           - else
             - resultset.each_with_index do |ts, index|
               %td
-                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
+                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id, 't_id'=>1 ,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
               %tr
                 %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
                   = "Buscando archivos..."
@@ -43,7 +43,7 @@
           - else
             - resultset.each_with_index do |ts, index|
               %td
-                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
+                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id, 't_id'=>1,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
               %tr
                 %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
                   = "Buscando archivos..."
@@ -82,7 +82,7 @@
           %td= supervised.staff_co_supervisor.full_name rescue ''
 
 %h2 Avances de comite tutoral
-- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date",:id=>current_user.id,:date=>Date.today - 300.days)
+- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date AND advance_type=1",:id=>current_user.id,:date=>Date.today - 300.days)
 
 - if advs.size == 0 
   = "No hay avances que mostrar"
@@ -111,7 +111,41 @@
             - else
               - resultset.each_with_index do |ts, index|
                 %td
-                  %a{'id'=>"a_#{adv.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>adv.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
+                  %a{'id'=>"a_#{adv.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>adv.id,'t_id'=>1,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
+                %tr
+                  %td{'id'=>"slider_#{adv.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
+                    = "Buscando archivos..."
+
+%h2 Evaluación de Protocolos
+- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date AND advance_type=2",:id=>current_user.id,:date=>Date.today - 300.days)
+- if advs.size == 0 
+  = "No hay avances que mostrar"
+- else 
+  %table.formatted-table.students_active
+    %tbody
+      %tr.header
+        %th Nombre
+        %th Titulo
+        %th Fecha
+        %th Avances
+      - advs.each do |adv|
+        - flag = 0
+        - resultset = adv.student.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
+        - resultset.each_with_index do |ts, index|
+          - if ts.term.start_date.to_datetime <= adv.advance_date.to_datetime
+            - flag = flag + 1
+        - if 1 #flag>=1
+          %tr.active-student-item{:id=>"active_advance_#{adv.id}", :advance_id=>adv.id}
+            %td= adv.student.full_name
+            %td= adv.title
+            %td= l adv.advance_date, :format => :long
+            - if resultset.size<=0
+              %td
+                = "No hay ciclos vigentes"
+            - else
+              - resultset.each_with_index do |ts, index|
+                %td
+                  %a{'id'=>"a_#{adv.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>adv.id,'t_id'=>2,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
                 %tr
                   %td{'id'=>"slider_#{adv.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
                     = "Buscando archivos..."
@@ -120,6 +154,7 @@
   $('.ts_files')
     .click(function(){
       var id      = $(this).attr("s_id");
+      var type    = $(this).attr("t_id");
       var adv_id  = $(this).attr("adv_id");
       var a       = $("#a_"+adv_id+"_"+id);
       var jqObj   = $("#slider_"+adv_id+"_"+id);
@@ -136,7 +171,7 @@
         jqObj.hide(1000);
         a.css("font-weight","normal");
       }
-      url = '/alumno/archivos/' + id;
+      url = '/alumno/archivos/' + id + '/' + type;
       $.get(url, {}, function(html) {
         jqObj.html(html);
       });

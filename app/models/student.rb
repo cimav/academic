@@ -32,6 +32,8 @@ class Student < ActiveRecord::Base
 
   has_many :student_advances_file_message, :as => :attachable
   accepts_nested_attributes_for :student_advances_file_message
+  
+  has_many :protocol
 
   ACTIVE    = 1
   GRADUATED = 2

@@ -1,0 +1,61 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+# This model initially had no columns defined.  If you add columns to the
+# model remove the '{}' from the fixture names and add the columns immediately
+# below each fixture, per the syntax in the comments below
+#
+#one: {}
+## column: value
+##
+#two: {}
+##  column: value
+##
+
+one:
+  id:            1
+  group:         1
+  question_type: 1
+  order:         1
+  question:     "Justificación del trabajo de tesis"
+
+two:
+  id:            2
+  group:         1
+  question_type: 1
+  order:         2
+  question:     "Profundidad del análisis del estado del arte en el tema de estudio"
+
+three:
+  id:            3
+  group:         1
+  question_type: 1
+  order:         3
+  question:     "Planteamiento de la hipótesis"
+
+four:
+  id:            4
+  group:         1
+  question_type: 1
+  order:         4
+  question:     "Existencia de materiales para implementación de los métodos que se utilizarán"
+
+five:
+  id:            5
+  group:         1
+  question_type: 1
+  order:         5
+  question:     "Existencia de la capacidad para caracterización de materiales"
+
+six:
+  id:            6
+  group:         1
+  question_type: 1
+  order:         6
+  question:     "Factibilidad de cumplimiento del cronograma de actividades"
+  
+seven:
+  id:            7
+  group:         1
+  question_type: 2
+  order:         7
+  question:     "Comentarios y observaciones"

@@ -42,3 +42,21 @@
     %tr
       %td="No hay avances a calificar"
 
+%table#student-schedule{:style=>'border:0px;'}
+  %caption
+    %h3="Evaluacion de protocolos"
+  - counter= 0
+  - if @protocols.size > 0
+    - @protocols.each do |a|
+      - counter = counter + 1
+      %tr
+        %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
+          .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
+            .session-title
+              %a{:href=>"/calificar/avance/#{a.id}"}= a.student.full_name
+            .session-staff{:id=>"sstaff_#{a.id}"}= "#{a.title}"
+            .session-comments= a.student.program.name
+  - else
+    %tr
+      %td="No hay evaluaciones que realizar"
+

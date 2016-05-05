@@ -100,7 +100,17 @@ class StaffsController < ApplicationController
   end
  
   def student_files
-    @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
+    @term_student =  TermStudent.find(params[:id])
+
+    if params[:type].to_i.eql? 2
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>3)
+    elsif params[:type].to_i.eql? 1
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>[1,2])
+    else
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
+    end
+
+
     if !@student_advances_files.size.eql? 0
       saf = @student_advances_files[0]
       if !saf.nil? 
@@ -131,7 +141,10 @@ class StaffsController < ApplicationController
 
     @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, @today, @today)
 
-    @advances = Advance.joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2])
+    #@advances = Advance.joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id and advance_type=1)",:id=>@staff.id,:level=>[1,2])
+    @advances = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND terms.status=3 AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>1)
+
+    @protocols = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.advance_start_date and terms.advance_end_date) AND terms.status in (1,2) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>2)
 
     respond_with do |format|
       format.html do
@@ -260,13 +273,27 @@ class StaffsController < ApplicationController
   end
   
   def get_advance_grades
-    @include_js = ["grades"] 
     @screen     = "grades"
     @access     = false
     
     @staff      = Staff.find(current_user.id)
     @advance    = Advance.find(params[:id])
+    @questions  = Question.where(:group=>1)
+
+    if @staff.nil?
+      render text: "Permisos insuficientes"
+      return
+    end
+
+    if @advance.advance_type.to_i.eql? Advance::PROTOCOL
+      @include_js = ["protocol"] 
+      @protocol   = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id)[0]
+      render 'protocol'
+      return
+    end
     
+    @include_js = ["grades"] 
+ 
     @advances    = Advance.where(:student_id=>@advance.student_id, :status=>'C').order("advance_date")
 
     if @staff.id.to_i.eql? @advance.tutor1.to_i
@@ -280,6 +307,150 @@ class StaffsController < ApplicationController
     elsif @staff.id.to_i.eql? @advance.tutor5.to_i
       @access = true
     end
+  end
+
+  def save_protocol
+    parameters   = {}
+    errors_array = Array.new
+    @advance     = Advance.find(params[:advance_id])
+    @staff       = Staff.find(current_user.id)
+
+    @protocol    = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id,:status=>Protocol::CREATED)
+
+    if @protocol.size > 0
+      @protocol = @protocol[0]
+    else
+      @protocol = Protocol.new
+      @protocol.advance_id = @advance.id
+      @protocol.staff_id   = @staff.id
+    end
+
+    @protocol.group      = 1
+    @protocol.status     = 3
+    @protocol.grade      = params[:grade]
+ 
+    if @protocol.save
+      @protocol.answers.destroy_all
+
+      params.each do |p|
+        if p[0].include? "question_id_"
+          q_id = p[0].split("_")[2]
+          textarea    = "text_area_#{q_id}"
+          radiobutton = "radio_button_#{q_id}"
+          
+          @answer = Answer.new
+          @answer.question_id = q_id
+          @answer.protocol_id = @protocol.id
+          @answer.answer      = params[radiobutton]
+          @answer.comments    = params[textarea]
+ 
+          if @answer.save
+            logger.info "TODO OK"
+          else
+            errors_array << "Error al crear respuestas"
+          end
+        end
+      end
+      
+      create_protocol(@protocol,@staff,@advance)
+      send_protocol_email(@advance,@staff)
+
+      parameters[:status] = 1
+      render_message @protocol,"Evaluación enviada",parameters
+    else
+      render_error @protocol,"Error al crear/editar protocolo",parameters,errors_array
+    end
+
+    #order = params[:button] || params[:commit]
+
+    #if order.eql? "Guardar"
+    #  sleep 1
+    #elsif order.eql? "send"
+    #  sleep 1
+    #end
+
+  end
+
+  def create_protocol(protocol,staff,advance)
+    @r_root  = Rails.root.to_s
+    @rectangles = true
+
+    supervisor      = Staff.find(advance.student.supervisor) rescue nil
+    supervisor_name = supervisor.full_name rescue "N.D"
+    supervisor_area = supervisor.area.name rescue "N.D"
+
+    created = "#{advance.created_at.day} de #{get_month_name(advance.created_at.month)} de #{advance.created_at.year}"
+    
+    filename  = "#{Settings.sapos_route}/private/files/students/#{advance.student.id}"
+    pdf_route = "#{filename}/protocol-#{advance.id}-#{staff.id}.pdf"
+
+    if File.exist?(pdf_route)
+      File.delete(pdf_route)
+    end
+
+    pdf = Prawn::Document.new(:margin=>[20,43,43,43])
+    size = 14
+
+    pdf.move_down 30
+    text = "FORMATO P-MA-E"
+    pdf.text text, :size=>size, :style=> :bold, :align=> :center
+
+    pdf.move_down 1
+    text = "EVALUACIÓN PROTOCOLOS"
+    pdf.text text ,:size=>size, :style=> :bold, :align=> :center
+
+    size = 11
+    
+    pdf.move_down 10
+    data = []
+    data << [{:content=>"Fecha de Evaluación: #{created}",:colspan=>2,:align=>:right}]
+    data << [{:content=>" ",:colspan=>2}]
+    data << ["Nombre del Alumno:",advance.student.full_name]
+    data << ["Nombre del Director de Tesis:",supervisor_name]
+    data << ["Departamento:",supervisor_area]
+    data << ["Programa:",advance.student.program.name]
+    data << ["Título de la Tesis:",advance.title]
+
+    tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[165,365])
+    tabla.draw
+    
+    pdf.move_down 10
+ 
+     icon_empty = pdf.table_icon('fa-square-o')
+     icon_ok    = pdf.table_icon('fa-check-square-o')
+     content1   = icon_empty
+
+    protocol.reload.answers.each do |a|
+      pdf.move_down 10
+      text = Question.find(a.question_id).question rescue "N.D"
+      pdf.text text, :size=>size, :style=>:bold
+
+      data = []
+
+
+      (a.answer.eql? 4) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"Excelente"]
+      (a.answer.eql? 3) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"Bien"]
+      (a.answer.eql? 2) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"Regular"]
+      (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"Deficiente"]
+      text = a.comments rescue ""
+      data << [{:content=>"Comentarios: #{text}",:colspan=>2}]
+      tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[30,500])
+      tabla.draw
+    end
+
+    pdf.render_file "#{pdf_route}"
+  end
+
+  def send_protocol_email(advance,staff)
+    address = advance.student.email_cimav rescue ""
+    content = "{:email=>\"#{address}\",:view=>9}"
+
+    @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Un evaluador ha calificado su protocolo",:content=>content,:status=>0})
+    @email.save
   end
   
   def set_advance_grades_token

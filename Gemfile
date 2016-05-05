@@ -1,12 +1,15 @@
+#ruby=ruby-2.0.0-p643
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.3'
+#gem 'rails', '3.2.3'
+gem 'rails', '3.2.14'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 #gem 'sqlite3'
-gem 'mysql2'
+#gem 'mysql2'
+gem 'mysql2', '~> 0.3.10'
 gem 'json'
 
 # Gems used only for assets and not required
@@ -35,7 +38,11 @@ gem 'spreadsheet'
 gem 'pdfkit'
 gem 'cancan'
 
+gem 'prawn'
+gem 'prawn-table'
+gem 'prawn-icon'
 
+gem 'config', '1.0.0'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
@@ -51,3 +58,6 @@ gem 'cancan'
 
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'
+#
+###### ruby=ruby-2.0.0-p643
+#
