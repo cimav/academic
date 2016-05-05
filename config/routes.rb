@@ -20,9 +20,10 @@ Academic::Application.routes.draw do
   match '/calificar/avance/:id/get/:token' => 'staffs#get_advance_grades_token'
   match '/calificar/avance/:id/:token/set' => 'staffs#set_advance_grades_token'
   match '/archivo/avance/:id/:token' => 'staffs#get_advance_file_token'
-  match '/alumno/archivos/:id' => 'staffs#student_files'
+  match '/alumno/archivos/:id/:type' => 'staffs#student_files'
   match '/alumno/archivo/:id' => 'staffs#student_file'
   match '/clase/:tc_id' => 'staffs#show_classroom_students'
+  match '/protocolo/guardar' => 'staffs#save_protocol'
 
   resources :student_advances_file_messages, :path=>'/avances/mensajes'
 end
