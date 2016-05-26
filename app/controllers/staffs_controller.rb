@@ -447,7 +447,7 @@ class StaffsController < ApplicationController
 
   def send_protocol_email(advance,staff)
     address = advance.student.email_cimav rescue ""
-    content = "{:email=>\"#{address}\",:view=>9}"
+    content = "{:email=>\"#{address}\",:view=>12}"
 
     @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Un evaluador ha calificado su protocolo",:content=>content,:status=>0})
     @email.save
