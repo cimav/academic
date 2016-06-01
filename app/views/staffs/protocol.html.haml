@@ -80,7 +80,7 @@
         = "Aprobado"
       %br
         - selected = (@protocol.grade.to_i.eql? 2) ? true: false rescue false
-        = radio_button_tag "grade",2, false, :disabled=>@disabled
+        = radio_button_tag "grade",2, selected, :disabled=>@disabled
         = "No aprobado"
       
   %p="&nbsp;".html_safe
