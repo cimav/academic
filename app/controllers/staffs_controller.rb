@@ -326,7 +326,7 @@ class StaffsController < ApplicationController
     end
 
     @protocol.group      = 1
-    #@protocol.status     = 3
+    @protocol.status     = 3
     @protocol.grade      = params[:grade]
  
     if @protocol.save
