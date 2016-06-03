@@ -10,9 +10,11 @@ class Advance < ActiveRecord::Base
   
   ADVANCE  = 1
   PROTOCOL = 2
+  SEMINAR  = 3
             
   TYPE = {  
     ADVANCE   => 'Avance programático',
     PROTOCOL  => 'Evaluación de protocolo',
+    SEMINAR   => 'Evaluación de seminario',
   }
 end

@@ -5,11 +5,11 @@ $(document).ready(function() {
 
       var rb_chk = $("input[type=radio]:checked");
       
-      if(rb_chk.length < 7)
+      /*if(rb_chk.length != 0)
       {
         alert("Debe seleccionar todas las opciones, los comentarios no son obligatorios")
         return false;
-      }
+      }*/
 
       $("#protocol-save").attr("disabled","disabled");
       $("#protocol-send").attr("disabled","disabled");

@@ -1,0 +1,92 @@
+- @access = (@protocol.status.to_i.eql? 3) ? true : false rescue false
+
+- if @access
+  - @disabled = true
+- else
+  - @disabled = false
+
+%h2="Evaluación de seminario"
+- if @disabled
+  = "(Evaluación de seminario ya realizada)"
+
+%p="&nbsp;".html_safe
+.protocol-head
+  .row
+    .label
+      = "Alumno:"
+    .text
+      = @advance.student.full_name
+    .label
+  .row
+    .label
+      = "Título:"
+    .text
+      =@advance.title
+  .row
+    .label
+      = "Programa:"
+    .text
+      = @advance.student.program.name
+  .row
+    .label
+      = "Director de Tesis:"
+    .text
+      = Staff.find(@advance.student.supervisor.to_i).full_name rescue "N.D"
+
+=form_tag "/protocolo/guardar", :remote=>true, :id=>"protocol-form", :name=>"protocol-form"
+= hidden_field_tag "advance_id", @advance.id
+.questions
+  - @questions.each do |q|
+    - answer = Answer.where(:question_id=>q.id,:protocol_id=>@protocol.id)[0] rescue nil
+    %p="&nbsp;".html_safe
+    %p="&nbsp;".html_safe
+    .question{:id=>"question_#{q.id}"}
+      = q.order.to_s + ". " + q.question+":"
+      = hidden_field_tag "question_id_#{q.id}", q.id
+      .answer
+        - if q.question_type.to_i.eql? 1
+          %br
+            - selected = (answer.answer.to_i.eql? 4) ? true : false rescue false
+            = radio_button_tag "radio_button_#{q.id}",4, selected, :disabled=>@disabled
+            = "Excelente"
+          %br
+            - selected = (answer.answer.to_i.eql? 3) ? true : false rescue false
+            = radio_button_tag "radio_button_#{q.id}",3, selected, :disabled=>@disabled
+            = "Bien"
+          %br
+            - selected = (answer.answer.to_i.eql? 2) ? true : false rescue false
+            = radio_button_tag "radio_button_#{q.id}",2, selected, :disabled=>@disabled
+            = "Regular"
+          %br
+            - selected = (answer.answer.to_i.eql? 1) ? true : false rescue false
+            = radio_button_tag "radio_button_#{q.id}",1, selected, :disabled=>@disabled
+            = "Deficiente"
+        - elsif q.question_type.to_i.eql? 2
+          %br
+            - text = answer.comments rescue nil
+            = text_area_tag "text_area_#{q.id}", text, :rows=>12, :cols=>80,  :disabled=>@disabled
+      
+  %p="&nbsp;".html_safe
+  %p="&nbsp;".html_safe
+  .question
+    = "Resultado:"
+    .answer
+      %br
+        - selected = (@protocol.grade.to_i.eql? 1) ? true: false rescue false
+        = radio_button_tag "grade",1, selected, :disabled=>@disabled
+        = "Aprobado"
+      %br
+        - selected = (@protocol.grade.to_i.eql? 2) ? true: false rescue false
+        = radio_button_tag "grade",2, selected, :disabled=>@disabled
+        = "No aprobado"
+      %br
+        - selected = (@protocol.grade.to_i.eql? 3) ? true: false rescue false
+        = radio_button_tag "grade", 3, selected, :disabled=>@disabled
+        = "Con recomendaciones"
+      
+  %p="&nbsp;".html_safe
+  = button_tag "Enviar",:id=>"protocol-send",:value=>"send",:class=>"button",:disabled=>@disabled
+  = image_tag "/images/ajax-load2.gif", :id=> "img_load" , :align=> 'center',:style=>'display:none;',:width=>20
+  #messages{:style=>'display:inline-block'}
+
+

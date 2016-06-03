@@ -145,6 +145,8 @@ class StaffsController < ApplicationController
     @advances = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND terms.status=3 AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>1)
 
     @protocols = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.advance_start_date and terms.advance_end_date) AND terms.status in (1,2) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>2)
+    
+    @seminars = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>3)
 
     respond_with do |format|
       format.html do
@@ -278,7 +280,6 @@ class StaffsController < ApplicationController
     
     @staff      = Staff.find(current_user.id)
     @advance    = Advance.find(params[:id])
-    @questions  = Question.where(:group=>1)
 
     if @staff.nil?
       render text: "Permisos insuficientes"
@@ -288,7 +289,14 @@ class StaffsController < ApplicationController
     if @advance.advance_type.to_i.eql? Advance::PROTOCOL
       @include_js = ["protocol"] 
       @protocol   = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id)[0]
+      @questions  = Question.where(:group=>1)
       render 'protocol'
+      return
+    elsif @advance.advance_type.to_i.eql? Advance::SEMINAR
+      @include_js = ["protocol"] 
+      @protocol   = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id)[0]
+      @questions  = Question.where(:group=>2)
+      render 'seminar'
       return
     end
     
@@ -325,7 +333,12 @@ class StaffsController < ApplicationController
       @protocol.staff_id   = @staff.id
     end
 
-    @protocol.group      = 1
+    if @advance.advance_type.eql? 2
+      @protocol.group      = 1
+    elsif @advance.advance_type.eql? 3
+      @protocol.group      = 2
+    end
+   
     @protocol.status     = 3
     @protocol.grade      = params[:grade]
  
@@ -353,7 +366,12 @@ class StaffsController < ApplicationController
       end
       
       create_protocol(@protocol,@staff,@advance)
-      send_protocol_email(@advance,@staff)
+
+      if @advance.advance_type.eql? 2
+        send_email(@advance,@staff,1)
+      elsif @advance.advance_type.eql? 3
+        send_email(@advance,@staff,2)
+      end
 
       parameters[:status] = 1
       render_message @protocol,"Evaluación enviada",parameters
@@ -382,7 +400,12 @@ class StaffsController < ApplicationController
     created = "#{advance.created_at.day} de #{get_month_name(advance.created_at.month)} de #{advance.created_at.year}"
     
     filename  = "#{Settings.sapos_route}/private/files/students/#{advance.student.id}"
-    pdf_route = "#{filename}/protocol-#{advance.id}-#{staff.id}.pdf"
+ 
+    if advance.advance_type.eql? 2
+      pdf_route = "#{filename}/protocol-#{advance.id}-#{staff.id}.pdf"
+    elsif advance.advance_type.eql? 3
+      pdf_route = "#{filename}/seminar-#{advance.id}-#{staff.id}.pdf"
+    end
 
     if File.exist?(pdf_route)
       File.delete(pdf_route)
@@ -437,19 +460,51 @@ class StaffsController < ApplicationController
       (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,"Deficiente"]
       text = a.comments rescue ""
-      data << [{:content=>"Comentarios: #{text}",:colspan=>2}]
+      data << [{:content=>"<b>Comentarios: #{text}</b>",:colspan=>2}]
       tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[30,500])
       tabla.draw
     end
 
+    pdf.move_down 10
+    data = []
+    data << [{:content=>"<b>Resultado</b>",:colspan=>2}]
+    
+    icon_empty = pdf.table_icon('fa-square-o')
+    icon_ok    = pdf.table_icon('fa-check-square-o')
+    content1   = icon_empty
+
+    if advance.advance_type.eql? 2 #protocol
+      (protocol.grade.eql? 1) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"Aprobado"]
+      (protocol.grade.eql? 2) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"No aprobado"]
+    elsif advance.advance_type.eql? 3 #protocol
+      (protocol.grade.eql? 1) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,{:content=>"Aprobado",:align=>:left}]
+      (protocol.grade.eql? 2) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"No aprobado"]
+      (protocol.grade.eql? 3) ? content1 = icon_ok : content1 = icon_empty
+      data << [content1,"Con Recomendaciones"]
+    end
+      
+    tabla = pdf.make_table(data,:width=>300,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:left,:column_widths=>[30,270])
+    tabla.draw
+
     pdf.render_file "#{pdf_route}"
   end
 
-  def send_protocol_email(advance,staff)
-    address = advance.student.email_cimav rescue ""
-    content = "{:email=>\"#{address}\",:view=>10}"
+  def send_email(advance,staff,opc)
+    #address = advance.student.email_cimav rescue ""
+    address = "enrique.turcott@cimav.edu.mx"
+   
+    if opc.eql? 1
+      content = "{:email=>\"#{address}\",:view=>10}"
+      @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Un evaluador ha calificado su protocolo",:content=>content,:status=>0})
+    elsif opc.eql? 2
+      content = "{:email=>\"#{address}\",:view=>17}"
+      @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Un evaluador ha calificado su seminario",:content=>content,:status=>0})
+    end
 
-    @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Un evaluador ha calificado su protocolo",:content=>content,:status=>0})
     @email.save
   end
   

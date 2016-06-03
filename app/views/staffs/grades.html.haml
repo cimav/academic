@@ -60,3 +60,21 @@
     %tr
       %td="No hay evaluaciones que realizar"
 
+%table#student-schedule{:style=>'border:0px;'}
+  %caption
+    %h3="Evaluacion de seminarios"
+  - counter= 0
+  - if @seminars.size > 0
+    - @seminars.each do |s|
+      - counter = counter + 1
+      %tr
+        %td.dia{:style=>'cursor:pointer;border:0px',:id=>"seminar_#{s.id}"}
+          .session_block(class="session_style_#{counter}"){:id=>"sblock_#{s.id}"}
+            .session-title
+              %a{:href=>"/calificar/avance/#{s.id}"}= s.student.full_name
+            .session-staff{:id=>"sstaff_#{s.id}"}= "#{s.title}"
+            .session-comments= s.student.program.name
+  - else
+    %tr
+      %td="No hay evaluaciones que realizar"
+
