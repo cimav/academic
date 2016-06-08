@@ -146,7 +146,7 @@ class StaffsController < ApplicationController
 
     @protocols = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.advance_start_date and terms.advance_end_date) AND terms.status in (1,2) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>2)
     
-    @seminars = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>3)
+    @seminars = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id) AND advances.advance_type=3 AND advances.status in (:status)",:id=>@staff.id,:level=>[1,2],:status=>['P']).where(:advance_type=>3)
 
     respond_with do |format|
       format.html do
@@ -320,18 +320,19 @@ class StaffsController < ApplicationController
   def save_protocol
     parameters   = {}
     errors_array = Array.new
-    @advance     = Advance.find(params[:advance_id])
+
+    @advance     = Advance.find(params[:advance_id]) 
     @staff       = Staff.find(current_user.id)
 
-    @protocol    = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id,:status=>Protocol::CREATED)
+    #@protocol    = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id)
 
-    if @protocol.size > 0
-      @protocol = @protocol[0]
-    else
+    #if @protocol.size > 0
+    #  @protocol = @protocol[0]
+    #else
       @protocol = Protocol.new
       @protocol.advance_id = @advance.id
       @protocol.staff_id   = @staff.id
-    end
+    #end
 
     if @advance.advance_type.eql? 2
       @protocol.group      = 1
@@ -339,8 +340,13 @@ class StaffsController < ApplicationController
       @protocol.group      = 2
     end
    
-    @protocol.status     = 3
     @protocol.grade      = params[:grade]
+
+    if @protocol.grade.eql? 3
+      @protocol.status = 4
+    else
+      @protocol.status = 3
+    end
  
     if @protocol.save
       @protocol.answers.destroy_all
@@ -373,7 +379,7 @@ class StaffsController < ApplicationController
         send_email(@advance,@staff,2)
       end
 
-      parameters[:status] = 1
+      parameters[:status] = @protocol.status
       render_message @protocol,"Evaluación enviada",parameters
     else
       render_error @protocol,"Error al crear/editar protocolo",parameters,errors_array

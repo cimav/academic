@@ -7,14 +7,16 @@ class Protocol < ActiveRecord::Base
 
   has_many :answers
 
-  CREATED   = 1
-  SENT      = 2
-  CANCELLED = 3
+  CANCELLED   = 1
+  SENT        = 2
+  CREATED     = 3
+  RECOMMENDED = 4 
   
   STATUS = {
-    CREATED   => 'Creado',  
-    SENT      => 'Enviado',
-    CANCELLED => 'Cancelado'
+    CREATED     => 'Creado',  
+    SENT        => 'Enviado',
+    CANCELLED   => 'Cancelado',
+    RECOMMENDED => 'En recomendaciones'
   }
 end
 

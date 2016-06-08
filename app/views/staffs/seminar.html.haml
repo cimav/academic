@@ -1,9 +1,18 @@
-- @access = (@protocol.status.to_i.eql? 3) ? true : false rescue false
+- @access       = (@protocol.status.to_i.eql? 3) ? true : false rescue false
+- @access_recom = (@protocol.status.to_i.eql? 4) ? true : false rescue false
 
 - if @access
   - @disabled = true
 - else
   - @disabled = false
+
+- if @access_recom
+  - @disabled       = true
+  - @disabled_recom = false
+  - @display_recom  = "block"
+- else
+  - @disabled_recom = true
+  - @display_recom  = "none"
 
 %h2="Evaluación de seminario"
 - if @disabled
@@ -35,12 +44,13 @@
 
 =form_tag "/protocolo/guardar", :remote=>true, :id=>"protocol-form", :name=>"protocol-form"
 = hidden_field_tag "advance_id", @advance.id
+= hidden_field_tag "protocol_id", 0
 .questions
   - @questions.each do |q|
     - answer = Answer.where(:question_id=>q.id,:protocol_id=>@protocol.id)[0] rescue nil
     %p="&nbsp;".html_safe
     %p="&nbsp;".html_safe
-    .question{:id=>"question_#{q.id}"}
+    .question{:id=>"question_#{q.id}",:q_type=>q.question_type}
       = q.order.to_s + ". " + q.question+":"
       = hidden_field_tag "question_id_#{q.id}", q.id
       .answer
@@ -68,7 +78,7 @@
       
   %p="&nbsp;".html_safe
   %p="&nbsp;".html_safe
-  .question
+  .question{:q_type=>'grade'}
     = "Resultado:"
     .answer
       %br
@@ -83,10 +93,26 @@
         - selected = (@protocol.grade.to_i.eql? 3) ? true: false rescue false
         = radio_button_tag "grade", 3, selected, :disabled=>@disabled
         = "Con recomendaciones"
-      
+
+  .recommendation{:style=>"display: #{@display_recom};"}
+    %p="&nbsp;".html_safe
+    = "Los siguientes campos deben ser llenados cuando se haga la revisión de recomendaciones: "
+    %p="&nbsp;".html_safe
+    .question{:q_type=>'recom'}
+      = "Se atendieron las recomendaciones?"
+      .answer
+        %br
+          - selected = false
+          = radio_button_tag "recom",1,selected,:disabled=>@disabled_recom
+          = "Si"
+        %br
+          - selected = false
+          = radio_button_tag "recom",2,selected,:disabled=>@disabled_recom
+          = "No"
+
   %p="&nbsp;".html_safe
+  - if !@disabled_recom
+    - @disabled = false
   = button_tag "Enviar",:id=>"protocol-send",:value=>"send",:class=>"button",:disabled=>@disabled
   = image_tag "/images/ajax-load2.gif", :id=> "img_load" , :align=> 'center',:style=>'display:none;',:width=>20
   #messages{:style=>'display:inline-block'}
-
-

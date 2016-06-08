@@ -59,3 +59,66 @@ seven:
   question_type: 2
   order:         7
   question:     "Comentarios y observaciones"
+
+eight:
+  id:            8
+  group:         2
+  question_type: 1
+  order:         1
+  question:     "Calidad de la presentación"
+
+nine:
+  id:            9
+  group:         2
+  question_type: 1
+  order:         2
+  question:     "Estructura de la presentación"
+
+ten:
+  id:            10
+  group:         2
+  question_type: 1
+  order:         3
+  question:     "Aporte científico y/o tecnológico"
+
+eleven:
+  id:            11
+  group:         2
+  question_type: 1
+  order:         4
+  question:     "Conocimiento de Aspectos Teóricos Fundamentales"
+
+twelve:
+  id:            12
+  group:         2
+  question_type: 1
+  order:         5
+  question:     "Originalidad"
+
+thirteen:
+  id:            13
+  group:         2
+  question_type: 1
+  order:         6
+  question:     "Metodología Experimental"
+
+fourteen:
+  id:            14
+  group:         2
+  question_type: 1
+  order:         7
+  question:     "Discusión de Resultados"
+
+fifhteen:
+  id:            15
+  group:         2
+  question_type: 1
+  order:         8
+  question:     "Conclusiones"
+
+sixteen:
+  id:            16
+  group:         2
+  question_type: 2
+  order:         9
+  question:     "Recomendaciones"
