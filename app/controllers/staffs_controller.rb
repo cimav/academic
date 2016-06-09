@@ -321,18 +321,18 @@ class StaffsController < ApplicationController
     parameters   = {}
     errors_array = Array.new
 
-    @advance     = Advance.find(params[:advance_id]) 
-    @staff       = Staff.find(current_user.id)
+    @protocol = Protocol.find(params[:protocol_id]) rescue nil
+    @access   = true
 
-    #@protocol    = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id)
+    @advance  = Advance.find(params[:advance_id]) rescue Advance.find(@protocol.advance_id)
+    @staff    = Staff.find(current_user.id)
 
-    #if @protocol.size > 0
-    #  @protocol = @protocol[0]
-    #else
-      @protocol = Protocol.new
+    if @protocol.nil?
+      @protocol            = Protocol.new
       @protocol.advance_id = @advance.id
       @protocol.staff_id   = @staff.id
-    #end
+      @protocol.status     = 3
+    end
 
     if @advance.advance_type.eql? 2
       @protocol.group      = 1
@@ -341,58 +341,155 @@ class StaffsController < ApplicationController
     end
    
     @protocol.grade      = params[:grade]
-
+    
     if @protocol.grade.eql? 3
       @protocol.status = 4
-    else
-      @protocol.status = 3
     end
+
+    if params[:recom].to_i.eql? 1
+      @protocol.status = 4
+      @protocol.grade  = 1
+      @access          = false
+    elsif params[:recom].to_i.eql? 2
+      @protocol.status = 4
+      @protocol.grade  = 2
+      @access          = false
+    end
+
  
     if @protocol.save
-      @protocol.answers.destroy_all
+      if @access
+        @protocol.answers.destroy_all
 
-      params.each do |p|
-        if p[0].include? "question_id_"
-          q_id = p[0].split("_")[2]
-          textarea    = "text_area_#{q_id}"
-          radiobutton = "radio_button_#{q_id}"
+        params.each do |p|
+          if p[0].include? "question_id_"
+            q_id = p[0].split("_")[2]
+            textarea    = "text_area_#{q_id}"
+            radiobutton = "radio_button_#{q_id}"
           
-          @answer = Answer.new
-          @answer.question_id = q_id
-          @answer.protocol_id = @protocol.id
-          @answer.answer      = params[radiobutton]
-          @answer.comments    = params[textarea]
+            @answer = Answer.new
+            @answer.question_id = q_id
+            @answer.protocol_id = @protocol.id
+            @answer.answer      = params[radiobutton]
+            @answer.comments    = params[textarea]
  
-          if @answer.save
-            logger.info "TODO OK"
-          else
-            errors_array << "Error al crear respuestas"
+            if @answer.save
+              logger.info "TODO OK"
+            else
+              errors_array << "Error al crear respuestas"
+            end
           end
         end
+        create_protocol(@protocol,@staff,@advance)
       end
-      
-      create_protocol(@protocol,@staff,@advance)
 
-      if @advance.advance_type.eql? 2
-        send_email(@advance,@staff,1)
-      elsif @advance.advance_type.eql? 3
-        send_email(@advance,@staff,2)
+      address = @advance.student.email_cimav rescue @advance.student.email  ## estudiante
+      if @advance.advance_type.eql? 2  #protocol
+        send_email(@advance,1,address)
+      elsif @advance.advance_type.eql? 3  #seminar
+        seminar_quorum_review(@advance,@staff)
+        send_email(@advance,2,address)
       end
 
       parameters[:status] = @protocol.status
+      parameters[:grade]  = @protocol.grade
       render_message @protocol,"Evaluación enviada",parameters
     else
       render_error @protocol,"Error al crear/editar protocolo",parameters,errors_array
     end
+  end
 
-    #order = params[:button] || params[:commit]
+  def seminar_quorum_review(advance,staff)
+    total       = advance.protocols.size
+    approved    = advance.protocols.where(:grade=>1).size
+    disapproved = advance.protocols.where(:grade=>2).size
+    recommended = advance.protocols.where(:grade=>3).size
+    params = {}
 
-    #if order.eql? "Guardar"
-    #  sleep 1
-    #elsif order.eql? "send"
-    #  sleep 1
-    #end
+    if total.eql? approved
+       ## seminario aprobado
+       ## cambia status a completado
+       advance.status = 'C'
+       advance.save
+       ## no manda correos
+    end
 
+    if disapproved>0
+      ## seminario no aprobado
+      ## cambia estatus
+      advance.status = 'C'
+      advance.save
+      ## manda correo al asistente de departamento, al interesado y al director de tesis
+      stf = Staff.find(advance.student.supervisor.to_i) rescue nil
+      params[:student_id] = advance.student_id
+
+      if stf
+        User.where(:status=>1).each do |u|
+          areas =  (eval u.areas) rescue nil
+          if !areas.nil?
+            if stf.area_id.in? areas
+              address = u.email
+              send_email(advance,3,address,params) ## asistente
+            end
+          end
+        end
+
+        if !stf.email.blank?
+          address = stf.email
+          send_email(advance,3,address,params)  ## dir. tesis
+        end
+      end
+
+      address = advance.student.email_cimav rescue advance.student.email  ## estudiante
+      send_email(advance,3,address,params) ## estudiante
+    end
+
+    if recommended>0
+      params[:student_id] = advance.student_id
+      ## seminario en recomendación
+      ## no cambia estatus
+      ## correo a los revisores, al interesado y al director de tesis
+      if !advance.tutor1.nil?
+         tutor = Staff.find(advance.tutor1.to_i) rescue nil
+         tutor_email(advance,tutor)
+      end
+      
+      if !advance.tutor2.nil?
+         tutor = Staff.find(advance.tutor2.to_i) rescue nil
+         tutor_email(advance,tutor)
+      end
+      
+      if !advance.tutor3.nil?
+         tutor = Staff.find(advance.tutor3.to_i) rescue nil
+         tutor_email(advance,tutor)
+      end
+      
+      if !advance.tutor4.nil?
+         tutor = Staff.find(advance.tutor4.to_i) rescue nil
+         tutor_email(advance,tutor)
+      end
+      
+      if !advance.tutor5.nil?
+         tutor = Staff.find(advance.tutor5.to_i) rescue nil
+         tutor_email(advance,tutor)
+      end
+
+      director = Staff.find(advance.student.supervisor.to_i) rescue nil ## dir.tesis
+      tutor_email(advance,director)
+
+      address = advance.student.email_cimav rescue advance.student.email 
+      send_email(advance,5,address,params) ## estudiante
+    end
+  end
+
+  def tutor_email(advance,tutor)
+    params[:student_id] = advance.student_id
+    if !tutor.nil?
+      if !tutor.email.blank?
+        address = tutor.email
+        send_email(advance,4,address,params) 
+      end
+    end
   end
 
   def create_protocol(protocol,staff,advance)
@@ -499,9 +596,8 @@ class StaffsController < ApplicationController
     pdf.render_file "#{pdf_route}"
   end
 
-  def send_email(advance,staff,opc)
-    #address = advance.student.email_cimav rescue ""
-    address = "enrique.turcott@cimav.edu.mx"
+  def send_email(advance,opc,address,params)
+    ##address = "enrique.turcott@cimav.edu.mx"  ## al atravezado
    
     if opc.eql? 1
       content = "{:email=>\"#{address}\",:view=>10}"
@@ -509,6 +605,15 @@ class StaffsController < ApplicationController
     elsif opc.eql? 2
       content = "{:email=>\"#{address}\",:view=>17}"
       @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Un evaluador ha calificado su seminario",:content=>content,:status=>0})
+    elsif opc.eql? 3
+      content = "{:email=>\"#{address}\",:view=>18,:student_id=>#{params[:student_id]}}"
+      @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Seminario no aprobado",:content=>content,:status=>0})
+    elsif opc.eql? 4
+      content = "{:email=>\"#{address}\",:view=>19,:student_id=>#{params[:student_id]}}"
+      @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Seminario con recomendaciones",:content=>content,:status=>0})
+    elsif opc.eql? 5
+      content = "{:email=>\"#{address}\",:view=>20}"
+      @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Seminario con recomendaciones",:content=>content,:status=>0})
     end
 
     @email.save

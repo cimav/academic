@@ -1,5 +1,6 @@
-- @access       = (@protocol.status.to_i.eql? 3) ? true : false rescue false
-- @access_recom = (@protocol.status.to_i.eql? 4) ? true : false rescue false
+- @access           = (@protocol.status.to_i.in? [3,4]) ? true : false rescue false
+- @access_recom     = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.eql? 3)) ? true : false rescue false
+- @access_recom_dis = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.in? [1,2])) ? true : false rescue false
 
 - if @access
   - @disabled = true
@@ -13,6 +14,9 @@
 - else
   - @disabled_recom = true
   - @display_recom  = "none"
+
+- if @access_recom_dis
+  - @display_recom  = "block"
 
 %h2="Evaluación de seminario"
 - if @disabled
@@ -44,7 +48,7 @@
 
 =form_tag "/protocolo/guardar", :remote=>true, :id=>"protocol-form", :name=>"protocol-form"
 = hidden_field_tag "advance_id", @advance.id
-= hidden_field_tag "protocol_id", 0
+= hidden_field_tag "protocol_id", (@protocol.id rescue 0)
 .questions
   - @questions.each do |q|
     - answer = Answer.where(:question_id=>q.id,:protocol_id=>@protocol.id)[0] rescue nil
@@ -96,17 +100,17 @@
 
   .recommendation{:style=>"display: #{@display_recom};"}
     %p="&nbsp;".html_safe
-    = "Los siguientes campos deben ser llenados cuando se haga la revisión de recomendaciones: "
-    %p="&nbsp;".html_safe
     .question{:q_type=>'recom'}
+      = "Los siguientes campos deben ser llenados cuando se haga la revisión de recomendaciones: "
+      %p="&nbsp;".html_safe
       = "Se atendieron las recomendaciones?"
       .answer
         %br
-          - selected = false
+          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.eql? 1)) ? true : false rescue false
           = radio_button_tag "recom",1,selected,:disabled=>@disabled_recom
           = "Si"
         %br
-          - selected = false
+          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.eql? 2)) ? true : false rescue false
           = radio_button_tag "recom",2,selected,:disabled=>@disabled_recom
           = "No"
 

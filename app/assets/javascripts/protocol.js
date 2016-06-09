@@ -49,9 +49,10 @@ $(document).ready(function() {
       $("#messages").html(res['flash']['error']);
     })
     .live('ajax:success', function(evt, xhr, status, xhr) {
-      var res  = $.parseJSON(xhr.responseText);
-      var sts  = res['params']['status'];
-      var p_id = res['uniq']
+      var res   = $.parseJSON(xhr.responseText);
+      var sts   = res['params']['status'];
+      var grade = res['params']['grade'];
+      var p_id  = res['uniq']
       $("#messages").html(res['flash']['notice']);
       if(sts==3)//created
       {
@@ -61,14 +62,27 @@ $(document).ready(function() {
       {
         $("#protocol-form :input").attr("disabled","disabled");
         $(".recommendation").show();
-        $("input[name=recom]").removeAttr("disabled","disabled");
+        if(grade==3){
+          $("input[name=recom]").removeAttr("disabled","disabled");
+        }
       }
 
       $("#protocol_id").val(p_id);
     })
-    .live('ajax:complete', function(evt, data, status, xhr) {
+    .live('ajax:complete', function(evt, xhr, status) {
+      var res   = $.parseJSON(xhr.responseText);
+      var sts   = res['params']['status'];
+      var grade = res['params']['grade'];
       $("#protocol_id").removeAttr("disabled","disabled");
-      $("#protocol-send").removeAttr("disabled","disabled");
+
+      if(sts==3){
+        $("#protocol-send").removeAttr("disabled","disabled");
+      }
+      else if(sts==4){
+        if(grade==3){
+          $("#protocol-send").removeAttr("disabled","disabled");
+        }
+      }
       $("#img_load").css("display","none");
     })
 

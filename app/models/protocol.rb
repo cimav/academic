@@ -4,6 +4,7 @@ class Protocol < ActiveRecord::Base
 
   belongs_to :staffs
   belongs_to :students
+  belongs_to :advances
 
   has_many :answers
 

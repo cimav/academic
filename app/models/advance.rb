@@ -6,7 +6,7 @@ class Advance < ActiveRecord::Base
 
   belongs_to :student
   
-  has_one :protocol
+  has_many :protocols
   
   ADVANCE  = 1
   PROTOCOL = 2
