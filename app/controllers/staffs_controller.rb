@@ -385,10 +385,10 @@ class StaffsController < ApplicationController
 
       address = @advance.student.email_cimav rescue @advance.student.email  ## estudiante
       if @advance.advance_type.eql? 2  #protocol
-        send_email(@advance,1,address)
+        send_email(@advance,1,address,parameters)
       elsif @advance.advance_type.eql? 3  #seminar
         seminar_quorum_review(@advance,@staff)
-        send_email(@advance,2,address)
+        send_email(@advance,2,address,parameters)
       end
 
       parameters[:status] = @protocol.status
@@ -400,7 +400,7 @@ class StaffsController < ApplicationController
   end
 
   def seminar_quorum_review(advance,staff)
-    total       = advance.protocols.size
+    total       = get_tutors_size(advance)
     approved    = advance.protocols.where(:grade=>1).size
     disapproved = advance.protocols.where(:grade=>2).size
     recommended = advance.protocols.where(:grade=>3).size
@@ -412,9 +412,7 @@ class StaffsController < ApplicationController
        advance.status = 'C'
        advance.save
        ## no manda correos
-    end
-
-    if disapproved>0
+    elsif disapproved.eql? 1
       ## seminario no aprobado
       ## cambia estatus
       advance.status = 'C'
@@ -442,9 +440,7 @@ class StaffsController < ApplicationController
 
       address = advance.student.email_cimav rescue advance.student.email  ## estudiante
       send_email(advance,3,address,params) ## estudiante
-    end
-
-    if recommended>0
+    elsif recommended.eql? 1
       params[:student_id] = advance.student_id
       ## seminario en recomendación
       ## no cambia estatus
@@ -480,6 +476,26 @@ class StaffsController < ApplicationController
       address = advance.student.email_cimav rescue advance.student.email 
       send_email(advance,5,address,params) ## estudiante
     end
+  end
+
+  def get_tutors_size(advance)
+    counter = 0
+    if !advance.tutor1.nil?
+      counter = counter + 1
+    end
+    if !advance.tutor2.nil?
+      counter = counter + 1
+    end
+    if !advance.tutor3.nil?
+      counter = counter + 1
+    end
+    if !advance.tutor4.nil?
+      counter = counter + 1
+    end
+    if !advance.tutor5.nil?
+      counter = counter + 1
+    end
+    return counter
   end
 
   def tutor_email(advance,tutor)

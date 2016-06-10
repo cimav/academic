@@ -75,10 +75,7 @@ $(document).ready(function() {
       var grade = res['params']['grade'];
       $("#protocol_id").removeAttr("disabled","disabled");
 
-      if(sts==3){
-        $("#protocol-send").removeAttr("disabled","disabled");
-      }
-      else if(sts==4){
+      if(sts==4){
         if(grade==3){
           $("#protocol-send").removeAttr("disabled","disabled");
         }
