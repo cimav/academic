@@ -146,7 +146,7 @@ class StaffsController < ApplicationController
 
     @protocols = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.advance_start_date and terms.advance_end_date) AND terms.status in (1,2) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id)",:id=>@staff.id,:level=>[1,2]).where(:advance_type=>2)
     
-    @seminars = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id) AND advances.advance_type=3 AND advances.status in (:status)",:id=>@staff.id,:level=>[1,2],:status=>['P']).where(:advance_type=>3)
+    @seminars = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id) AND advances.advance_type=3 AND advances.status in (:status)",:id=>@staff.id,:level=>[1,2],:status=>['P','C']).where(:advance_type=>3)
 
     respond_with do |format|
       format.html do
