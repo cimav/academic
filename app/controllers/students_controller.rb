@@ -12,7 +12,7 @@ class StudentsController < ApplicationController
     #last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>@student.id}).order("terms.end_date desc").limit(1)[0] rescue ""
     last_term = Term.where("name like '%#{$NCICLO}%' and name like '%#{campus_short_name}%' and program_id=? and status=1",@student.program_id).last
     #last_term  = Term.where("name like '%2016-1%' and program_id=?",@student.program_id).last
-    @ts  = TermStudent.where(:term_id=>last_term.id).last
+    @ts  = TermStudent.where(:student_id=>@student.id,:term_id=>last_term.id).last
     logger.info "######################### #{@ts}"
     @tcs = TermCourseStudent.where(:term_student_id=>@ts.id,:status=>6)
     @tsp = TermStudentPayment.where(:term_student_id=>@ts.id,:status=>6)
