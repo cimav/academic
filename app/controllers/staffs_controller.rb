@@ -558,31 +558,33 @@ class StaffsController < ApplicationController
     
     pdf.move_down 10
  
-     icon_empty = pdf.table_icon('fa-square-o')
-     icon_ok    = pdf.table_icon('fa-check-square-o')
-     content1   = icon_empty
+    icon_empty = pdf.table_icon('fa-square-o')
+    icon_ok    = pdf.table_icon('fa-check-square-o')
+    content1   = icon_empty
 
     protocol.reload.answers.each do |a|
       pdf.move_down 10
-      text = Question.find(a.question_id).question rescue "N.D"
+      question = Question.find(a.question_id)
+      text     = question.question rescue "N.D"
       pdf.text text, :size=>size, :style=>:bold
 
       data = []
-
-
-      (a.answer.eql? 4) ? content1 = icon_ok : content1 = icon_empty
-      data << [content1,"Excelente"]
-      (a.answer.eql? 3) ? content1 = icon_ok : content1 = icon_empty
-      data << [content1,"Bien"]
-      (a.answer.eql? 2) ? content1 = icon_ok : content1 = icon_empty
-      data << [content1,"Regular"]
-      (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
-      data << [content1,"Deficiente"]
-      text = a.comments rescue ""
-      data << [{:content=>"<b>Comentarios: #{text}</b>",:colspan=>2}]
-      tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[30,500])
-      tabla.draw
-    end
+      if question.question_type.eql? 1
+        (a.answer.eql? 4) ? content1 = icon_ok : content1 = icon_empty
+        data << [content1,"Excelente"]
+        (a.answer.eql? 3) ? content1 = icon_ok : content1 = icon_empty
+        data << [content1,"Bien"]
+        (a.answer.eql? 2) ? content1 = icon_ok : content1 = icon_empty
+        data << [content1,"Regular"]
+        (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
+        data << [content1,"Deficiente"]
+      elsif question.question_type.eql? 2
+        text = a.comments rescue ""
+        data << [{:content=>"#{text}",:colspan=>2}]
+      end
+        tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[30,500])
+        tabla.draw
+    end  ## end protocol.answeers
 
     pdf.move_down 10
     data = []
@@ -597,7 +599,7 @@ class StaffsController < ApplicationController
       data << [content1,"Aprobado"]
       (protocol.grade.eql? 2) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,"No aprobado"]
-    elsif advance.advance_type.eql? 3 #protocol
+    elsif advance.advance_type.eql? 3 #seminar
       (protocol.grade.eql? 1) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,{:content=>"Aprobado",:align=>:left}]
       (protocol.grade.eql? 2) ? content1 = icon_ok : content1 = icon_empty
