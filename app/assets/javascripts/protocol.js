@@ -3,15 +3,17 @@ $(document).ready(function() {
     .live("ajax:beforeSend",function(evt,xht,settings){
       console.log("Antes de ...");
 
+      /* validando radiobuttons */
       var rb_chk = $(".question[q_type='1'] input[type=radio]:checked");
       var q_type = $(".question[q_type='1']");
-      
+
       if(rb_chk.length != q_type.length)
       {
         alert("Debe seleccionar todas las opciones para continuar, los comentarios no son obligatorios");
         return false;
       }
 
+      /* validando calificacion general */
       var grade_chk = $(".question[q_type='grade'] input[type=radio]:checked");
 
       if(grade_chk.length!=1){
@@ -23,10 +25,6 @@ $(document).ready(function() {
       $("#protocol-send").attr("disabled","disabled");
       $("#img_load").css("display","inline-block");
       $("#messages").html("");
-    })
-    .live("ajax:error", function(evt, xhr, status, error) {
-      var res = $.parseJSON(xhr.responseText);
-      $("#messages").html(res['flash']['error']);
     })
     .live('ajax:success', function(evt, xhr, status, xhr) {
       var res = $.parseJSON(xhr.responseText);
@@ -40,13 +38,24 @@ $(document).ready(function() {
       
     })
     .live('ajax:complete', function(evt, data, status, xhr) {
-      $("#protocol-send").attr("disabled","disabled");
+      //$("#protocol-send").attr("disabled","disabled");
+      $("#protocol-send").removeAttr("disabled","disabled");
       $("#img_load").css("display","inline-block");
-      $("#messages").html("");
     })
     .live("ajax:error", function(evt, xhr, status, error) {
-      var res = $.parseJSON(xhr.responseText);
-      $("#messages").html(res['flash']['error']);
+      var res    = $.parseJSON(xhr.responseText);
+      var ignore = 0
+
+      for (e in res['errors']){
+        if(e=='id')
+        {
+          ignore = ignore + 1
+        }
+      }
+
+      if(ignore==0){
+        $("#messages").html(res['flash']['error']);
+      }
     })
     .live('ajax:success', function(evt, xhr, status, xhr) {
       var res   = $.parseJSON(xhr.responseText);

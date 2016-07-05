@@ -79,6 +79,10 @@
           %br
             - text = answer.comments rescue nil
             = text_area_tag "text_area_#{q.id}", text, :rows=>12, :cols=>80,  :disabled=>@disabled
+        - elsif q.question_type.to_i.eql? 3 ## 0-100 scale
+          %br
+            - answer   = answer.answer.to_i rescue ""
+            = select_tag "radio_button_#{q.id}",options_for_select((0..100).to_a,answer), :prompt=> "--"
       
   %p="&nbsp;".html_safe
   %p="&nbsp;".html_safe

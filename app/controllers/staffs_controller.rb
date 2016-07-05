@@ -356,7 +356,16 @@ class StaffsController < ApplicationController
       @access          = false
     end
 
- 
+=begin
+    parameters[:status] = @protocol.status
+    parameters[:grade]  = @protocol.grade
+    if @protocol.save
+      render_message @protocol,"Evaluación enviada",parameters
+    else
+      render_error @protocol,"Error al crear/editar protocolo",parameters,nil
+    end
+=end
+
     if @protocol.save
       if @access
         @protocol.answers.destroy_all
@@ -395,7 +404,7 @@ class StaffsController < ApplicationController
       parameters[:grade]  = @protocol.grade
       render_message @protocol,"Evaluación enviada",parameters
     else
-      render_error @protocol,"Error al crear/editar protocolo",parameters,errors_array
+      render_error @protocol,"Error al crear/editar protocolo",parameters,nil
     end
   end
 
@@ -569,7 +578,7 @@ class StaffsController < ApplicationController
       pdf.text text, :size=>size, :style=>:bold
 
       data = []
-      if question.question_type.eql? 1
+      if question.question_type.eql? 1  ## multiple option
         (a.answer.eql? 4) ? content1 = icon_ok : content1 = icon_empty
         data << [content1,"Excelente"]
         (a.answer.eql? 3) ? content1 = icon_ok : content1 = icon_empty
@@ -578,9 +587,10 @@ class StaffsController < ApplicationController
         data << [content1,"Regular"]
         (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
         data << [content1,"Deficiente"]
-      elsif question.question_type.eql? 2
-        text = a.comments rescue ""
-        data << [{:content=>"#{text}",:colspan=>2}]
+      elsif question.question_type.eql? 2 ## text
+        answer = a.answer rescue "n.d."
+        data << [{:content=>"#{answer}",:colspan=>2}]
+      elsif question.question_type.eql? 3 ## grade
       end
         tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[30,500])
         tabla.draw

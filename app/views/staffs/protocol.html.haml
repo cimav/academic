@@ -44,7 +44,8 @@
       = q.order.to_s + ". " + q.question+":"
       = hidden_field_tag "question_id_#{q.id}", q.id
       .answer
-        - if q.question_type.to_i.eql? 1
+        q.question_type.to_i
+        - if q.question_type.to_i.eql? 1 ## multiple options
           %br
             - selected = (answer.answer.to_i.eql? 4) ? true : false rescue false
             = radio_button_tag "radio_button_#{q.id}",4, selected, :disabled=>@disabled
@@ -64,10 +65,11 @@
           %br
             - text = answer.comments rescue nil
             = text_area_tag "text_area_#{q.id}", text, :rows=>6, :cols=>80, :disabled=>@disabled
-        - elsif q.question_type.to_i.eql? 2
+        - elsif q.question_type.to_i.eql? 2 ## open text
           %br
             - text = answer.comments rescue nil
             = text_area_tag "text_area_#{q.id}", text, :rows=>12, :cols=>80,  :disabled=>@disabled
+
       
   %p="&nbsp;".html_safe
   %p="&nbsp;".html_safe
