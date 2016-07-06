@@ -1,7 +1,25 @@
 $(document).ready(function() {
+  grade_1 = $("#grade_1:checked")
+  if(grade_1.length>0){
+    $('.text_area_a').show();
+  }else{
+    $('.text_area_a').hide();
+  }
+
+  $(".grade_a").click(function(){
+    value = $(this).val();
+    if(value==1){
+      $('.text_area_a').show();
+    }
+    else if(value==2){
+      $('.text_area_a').hide();
+    }
+  });
+
   $('#protocol-form')
     .live("ajax:beforeSend",function(evt,xht,settings){
-      console.log("Antes de ...");
+      console.log("Before send ...");
+      $("#messages").html("");
 
       /* validando radiobuttons */
       var rb_chk = $(".question[q_type='1'] input[type=radio]:checked");
@@ -9,18 +27,53 @@ $(document).ready(function() {
 
       if(rb_chk.length != q_type.length)
       {
-        alert("Debe seleccionar todas las opciones para continuar, los comentarios no son obligatorios");
+        alert("Debe seleccionar todas las opciones para continuar");
         return false;
       }
 
-      /* validando calificacion general */
+      /* validando grades */
+      grades   = $(".question[q_type='3'] option:selected")
+      q_grade  = $(".question[q_type='3']")
+      t_grades = grades.length
+
+      $.each(grades,function(index,value){
+        if($(value).val()!=""){
+          t_grades = t_grades - 1
+        } 
+      });
+
+      if(t_grades>0)
+      {
+        alert("Debe calificar todas las opciones para continuar");
+        return false;
+      }
+
+      /* validando recomendaciones */
       var grade_chk = $(".question[q_type='grade'] input[type=radio]:checked");
 
       if(grade_chk.length!=1){
-        alert("Debe calificar para continuar");
+        alert("Debe elegir una opción de recomendaciones para continuar");
         return false;
       }
 
+      /* validando texto */
+      grade_1   = $("#grade_1:checked")
+      textareas = $(".text_area_a")
+      t_tareas  = 0
+
+      $.each(textareas,function(index,value){
+        if($(value).val()==""){
+          t_tareas = t_tareas + 1
+        } 
+      });
+      
+      if(grade_1.length>0){
+        if(t_tareas>0){
+          alert("Si eligió con recomendaciones no puede dejar el campo vacío")
+          return false;
+        }
+      }
+      
       $("#protocol-save").attr("disabled","disabled");
       $("#protocol-send").attr("disabled","disabled");
       $("#img_load").css("display","inline-block");
