@@ -4,6 +4,9 @@
     %title= @page_title || 'Académicos CIMAV'
     = stylesheet_link_tag "custom-theme/jquery-ui"
     = stylesheet_link_tag "application"
+    - if !@include_css.nil?
+      - @include_css.each do |css|
+        = stylesheet_link_tag css
     /[if lt IE 8]
     = javascript_include_tag "application"
     - if !@include_js.nil?

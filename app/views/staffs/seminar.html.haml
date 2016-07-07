@@ -1,3 +1,8 @@
+- @include_js  << "select2"
+- @include_js  << "select2_locale_es"
+- @include_css  = Array.new
+- @include_css << "select2/select2"
+
 - @access           = (@protocol.status.to_i.in? [3,4]) ? true : false rescue false
 - @access_recom     = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.eql? 3)) ? true : false rescue false
 - @access_recom_dis = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.in? [1,2])) ? true : false rescue false
@@ -45,6 +50,11 @@
       = "Director de Tesis:"
     .text
       = Staff.find(@advance.student.supervisor.to_i).full_name rescue "N.D"
+  .row
+    .labe
+      = "&nbsp;".html_safe
+    .text{:style=>"color: red;"}
+      = "* Debe calificarse en una escala del 0 al 100"
 
 =form_tag "/protocolo/guardar", :remote=>true, :id=>"protocol-form", :name=>"protocol-form"
 = hidden_field_tag "advance_id", @advance.id
@@ -82,7 +92,8 @@
         - elsif q.question_type.to_i.eql? 3 ## 0-100 scale
           %br
             - answer   = answer.answer.to_i rescue ""
-            = select_tag "radio_button_#{q.id}",options_for_select((0..100).to_a,answer), :prompt=> "--"
+            = select_tag "radio_button_#{q.id}",options_for_select((0..100).to_a,answer), :prompt=> "----",:class=>"scale"
+            = "*"
       
   .question{:q_type=>'grade'}
     .answer
@@ -117,3 +128,9 @@
   = button_tag "Enviar",:id=>"protocol-send",:value=>"send",:class=>"button",:disabled=>@disabled
   = image_tag "/images/ajax-load2.gif", :id=> "img_load" , :align=> 'center',:style=>'display:none;',:width=>20
   #messages{:style=>'display:inline-block'}
+
+:javascript
+  $(document).ready(function(){
+    $('.scale').select2();
+  });
+
