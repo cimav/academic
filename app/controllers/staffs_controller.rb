@@ -293,7 +293,7 @@ class StaffsController < ApplicationController
       render 'protocol'
       return
     elsif @advance.advance_type.to_i.eql? Advance::SEMINAR
-      @include_js = ["protocol"] 
+      @include_js = ["seminar"] 
       @protocol   = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id)[0]
       @questions  = Question.where(:group=>2)
       render 'seminar'
@@ -334,61 +334,70 @@ class StaffsController < ApplicationController
       @protocol.status     = 3
     end
 
-    if @advance.advance_type.eql? 2
+    if @advance.advance_type.eql? 2 # protocol
       @protocol.group      = 1
-    elsif @advance.advance_type.eql? 3
+    elsif @advance.advance_type.eql? 3 # seminar
       @protocol.group      = 2
+      
+      if params[:recom].to_i.eql? 1 ## yes recomm
+        @protocol.status        = 4
+        @protocol.grade_status  = 1
+        @access                 = false
+      elsif params[:recom].to_i.eql? 2 ## no recomm
+        @protocol.status       = 4
+        @protocol.grade_status = 2
+        @access                = false
+      end
     end
-   
-    @protocol.grade      = params[:grade]
-    
-    if @protocol.grade.eql? 3
-      @protocol.status = 4
-    end
-
-    if params[:recom].to_i.eql? 1
-      @protocol.status = 4
-      @protocol.grade  = 1
-      @access          = false
-    elsif params[:recom].to_i.eql? 2
-      @protocol.status = 4
-      @protocol.grade  = 2
-      @access          = false
-    end
-
-=begin
-    parameters[:status] = @protocol.status
-    parameters[:grade]  = @protocol.grade
-    if @protocol.save
-      render_message @protocol,"Evaluación enviada",parameters
-    else
-      render_error @protocol,"Error al crear/editar protocolo",parameters,nil
-    end
-=end
+        
+    @protocol.grade_status = params[:grade_status]
+    parameters[:status]    = @protocol.status
 
     if @protocol.save
       if @access
         @protocol.answers.destroy_all
+        counter = 0
+        sum     = 0
 
         params.each do |p|
           if p[0].include? "question_id_"
             q_id = p[0].split("_")[2]
-            textarea    = "text_area_#{q_id}"
-            radiobutton = "radio_button_#{q_id}"
+            textarea      = "text_area_#{q_id}"
+            radiobutton   = "radio_button_#{q_id}"
+            question_type = "question_type_#{q_id}"
           
             @answer = Answer.new
             @answer.question_id = q_id
             @answer.protocol_id = @protocol.id
             @answer.answer      = params[radiobutton]
             @answer.comments    = params[textarea]
+
+            if @advance.advance_type.eql? 3 # seminar
+              if params[question_type].to_i.eql? 3 
+                sum = @answer.answer + sum
+                counter = counter + 1
+              end
+            end
  
             if @answer.save
               logger.info "TODO OK"
             else
               errors_array << "Error al crear respuestas"
-            end
+            end ## answer.save
+          end ## if p[0].include...
+        end ## params.each do ...
+        
+        if @advance.advance_type.eql? 3 # seminar
+          avg = sum/counter rescue nil
+
+          if avg>70
+            @protocol.grade_status = 1
           end
+
+          @protocol.grade = avg
+          @protocol.save
         end
+
         create_protocol(@protocol,@staff,@advance)
       end
 
@@ -400,8 +409,6 @@ class StaffsController < ApplicationController
         send_email(@advance,2,address,parameters)
       end
 
-      parameters[:status] = @protocol.status
-      parameters[:grade]  = @protocol.grade
       render_message @protocol,"Evaluación enviada",parameters
     else
       render_error @protocol,"Error al crear/editar protocolo",parameters,nil
@@ -410,9 +417,9 @@ class StaffsController < ApplicationController
 
   def seminar_quorum_review(advance,staff)
     total       = get_tutors_size(advance)
-    approved    = advance.protocols.where(:grade=>1).size
-    disapproved = advance.protocols.where(:grade=>2).size
-    recommended = advance.protocols.where(:grade=>3).size
+    approved    = advance.protocols.where(:grade_status=>1).size
+    disapproved = advance.protocols.where(:grade_status=>2).size
+    recommended = advance.protocols.where(:grade_status=>3).size
     params = {}
 
     if total.eql? approved
@@ -591,6 +598,8 @@ class StaffsController < ApplicationController
         answer = a.answer rescue "n.d."
         data << [{:content=>"#{answer}",:colspan=>2}]
       elsif question.question_type.eql? 3 ## grade
+        answer = a.answer rescue "n.d."
+        data << [{:content=>"#{answer}",:colspan=>2}]
       end
         tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[30,500])
         tabla.draw
@@ -605,16 +614,16 @@ class StaffsController < ApplicationController
     content1   = icon_empty
 
     if advance.advance_type.eql? 2 #protocol
-      (protocol.grade.eql? 1) ? content1 = icon_ok : content1 = icon_empty
+      (protocol.grade_status.eql? 1) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,"Aprobado"]
-      (protocol.grade.eql? 2) ? content1 = icon_ok : content1 = icon_empty
+      (protocol.grade_status.eql? 2) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,"No aprobado"]
     elsif advance.advance_type.eql? 3 #seminar
-      (protocol.grade.eql? 1) ? content1 = icon_ok : content1 = icon_empty
+      (protocol.grade_status.eql? 1) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,{:content=>"Aprobado",:align=>:left}]
-      (protocol.grade.eql? 2) ? content1 = icon_ok : content1 = icon_empty
+      (protocol.grade_status.eql? 2) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,"No aprobado"]
-      (protocol.grade.eql? 3) ? content1 = icon_ok : content1 = icon_empty
+      (protocol.grade_status.eql? 3) ? content1 = icon_ok : content1 = icon_empty
       data << [content1,"Con Recomendaciones"]
     end
       

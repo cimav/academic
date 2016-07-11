@@ -4,8 +4,8 @@
 - @include_css << "select2/select2"
 
 - @access           = (@protocol.status.to_i.in? [3,4]) ? true : false rescue false
-- @access_recom     = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.eql? 3)) ? true : false rescue false
-- @access_recom_dis = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.in? [1,2])) ? true : false rescue false
+- @access_recom     = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 3)) ? true : false rescue false
+- @access_recom_dis = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.in? [1,2])) ? true : false rescue false
 
 - if @access
   - @disabled = true
@@ -67,6 +67,7 @@
     .question{:id=>"question_#{q.id}",:q_type=>q.question_type}
       = q.order.to_s + ". " + q.question+":"
       = hidden_field_tag "question_id_#{q.id}", q.id
+      = hidden_field_tag "question_type_#{q.id}", q.question_type
       .answer
         - if q.question_type.to_i.eql? 1
           %br
@@ -99,11 +100,11 @@
     .answer
       %br
         - selected = (@protocol.status.to_i.eql? 4) ? true: false rescue false
-        = radio_button_tag "grade",1, selected, :disabled=>@disabled, :class=>"grade_a"
+        = radio_button_tag "grade_status",1, selected, :disabled=>@disabled, :class=>"grade_a"
         = "Con recomendaciones"
       %br
         - selected = (@protocol.status.to_i.in? [1,2,3]) ? true: false rescue false
-        = radio_button_tag "grade",2, selected, :disabled=>@disabled, :class=>"grade_a"
+        = radio_button_tag "grade_status",2, selected, :disabled=>@disabled, :class=>"grade_a"
         = "Sin recomendaciones"
 
   .recommendation{:style=>"display: #{@display_recom};"}
@@ -114,11 +115,11 @@
       = "Se atendieron las recomendaciones?"
       .answer
         %br
-          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.eql? 1)) ? true : false rescue false
+          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 1)) ? true : false rescue false
           = radio_button_tag "recom",1,selected,:disabled=>@disabled_recom
           = "Si"
         %br
-          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade.to_i.eql? 2)) ? true : false rescue false
+          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 2)) ? true : false rescue false
           = radio_button_tag "recom",2,selected,:disabled=>@disabled_recom
           = "No"
 
