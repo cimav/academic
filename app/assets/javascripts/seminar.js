@@ -1,6 +1,6 @@
 $(document).ready(function() {
-  grade_1 = $("#grade_1:checked")
-  if(grade_1.length>0){
+  grade_1 = $("#grade_status_1").prop("checked");
+  if(grade_1){
     $('.text_area_a').show();
   }else{
     $('.text_area_a').hide();
@@ -14,6 +14,11 @@ $(document).ready(function() {
     else if(value==2){
       $('.text_area_a').hide();
     }
+  });
+
+  $("#recom-send").click(function(){
+    send_recomms();
+    return false;
   });
 
   $('#protocol-form')
@@ -92,7 +97,7 @@ $(document).ready(function() {
     })
     .live('ajax:complete', function(evt, data, status, xhr) {
       //$("#protocol-send").attr("disabled","disabled");
-      $("#protocol-send").removeAttr("disabled","disabled");
+      //$("#protocol-send").removeAttr("disabled","disabled");
       $("#img_load").css("display","inline-block");
     })
     .live("ajax:error", function(evt, xhr, status, error) {
@@ -116,17 +121,12 @@ $(document).ready(function() {
       var grade = res['params']['grade'];
       var p_id  = res['uniq']
       $("#messages").html(res['flash']['notice']);
-      if(sts==3)//created
+      $("#protocol-form :input").attr("disabled","disabled");
+      if(sts==4)//recommendation
       {
-        $("#protocol-form :input").attr("disabled","disabled");
-      }
-      else if(sts==4)//recommendation
-      {
-        $("#protocol-form :input").attr("disabled","disabled");
+        $("input[name='recom']").removeAttr("disabled","disabled");
+        $("#recom-send").removeAttr("disabled","disabled");
         $(".recommendation").show();
-        if(grade==3){
-          $("input[name=recom]").removeAttr("disabled","disabled");
-        }
       }
 
       $("#protocol_id").val(p_id);
@@ -136,13 +136,45 @@ $(document).ready(function() {
       var sts   = res['params']['status'];
       var grade = res['params']['grade'];
       $("#protocol_id").removeAttr("disabled","disabled");
-
-      if(sts==4){
-        if(grade==3){
-          $("#protocol-send").removeAttr("disabled","disabled");
-        }
-      }
+      $('.scale').select2("disable");
       $("#img_load").css("display","none");
     })
 
 });
+
+function send_recomms(){
+  recom       = $("input[name='recom']:checked").val();
+  protocol_id = $("#protocol_id").val();
+ 
+  if(!recom){
+    alert("Debe seleccionar una opción");
+    return false;
+  }
+  
+  uri  = "/protocolo/recomm/"+protocol_id
+  data = "recom="+recom
+
+  $.ajax({
+    type:  'POST',
+    url:   uri,
+    data:  data,
+    beforeSend: function( xhr ) {
+    },
+    success:  function(data){
+      $("input[name='recom']").attr("disabled","disabled");
+      $("#recom-send").attr("disabled","disabled");
+    },
+    error: function(xhr, textStatus, error){
+       var text = xhr.responseText;
+       try{
+         var jq   = jQuery.parseJSON(xhr.responseText);
+       }
+       catch(e){
+         alert("Error desconocido: "+e.message)
+       }
+    },
+    complete: function(){
+      
+    },
+  });
+}

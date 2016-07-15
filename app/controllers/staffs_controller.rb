@@ -336,35 +336,45 @@ class StaffsController < ApplicationController
 
     if @advance.advance_type.eql? 2 # protocol
       @protocol.group      = 1
+      @protocol.grade_status = params[:grade_status]
+      parameters[:status]    = @protocol.status
     elsif @advance.advance_type.eql? 3 # seminar
       @protocol.group      = 2
-      
+    
+      recomm = params[:grade_status]
+
+      if recomm.to_i.eql? 1  ## con recomm
+        @protocol.status       = 4
+        @protocol.grade_status = 3
+      end
+
+=begin
       if params[:recom].to_i.eql? 1 ## yes recomm
         @protocol.status        = 4
-        @protocol.grade_status  = 1
         @access                 = false
       elsif params[:recom].to_i.eql? 2 ## no recomm
         @protocol.status       = 4
-        @protocol.grade_status = 2
         @access                = false
       end
+=end
     end
         
-    @protocol.grade_status = params[:grade_status]
-    parameters[:status]    = @protocol.status
-
     if @protocol.save
       if @access
         @protocol.answers.destroy_all
-        counter = 0
-        sum     = 0
+        counter   = 0
+        sum       = 0
+        reprobate = false
 
         params.each do |p|
           if p[0].include? "question_id_"
             q_id = p[0].split("_")[2]
             textarea      = "text_area_#{q_id}"
             radiobutton   = "radio_button_#{q_id}"
-            question_type = "question_type_#{q_id}"
+            question_id   = "question_id_#{q_id}"
+
+            question      = Question.find(params[question_id].to_i)
+            question_type = question.question_type
           
             @answer = Answer.new
             @answer.question_id = q_id
@@ -372,11 +382,17 @@ class StaffsController < ApplicationController
             @answer.answer      = params[radiobutton]
             @answer.comments    = params[textarea]
 
-            if @advance.advance_type.eql? 3 # seminar
-              if params[question_type].to_i.eql? 3 
-                sum = @answer.answer + sum
+            if @advance.advance_type.to_i.eql? 3 # seminar
+              if question_type.to_i.eql? 3 # grade question type
+                if question.order.to_i.eql? 4
+                  if @answer.answer.to_i<70
+                    reprobate = true
+                  end#@answer.answer
+                end#question.order
+
+                sum = @answer.answer.to_i + sum
                 counter = counter + 1
-              end
+              end#params[question_type]
             end
  
             if @answer.save
@@ -388,11 +404,19 @@ class StaffsController < ApplicationController
         end ## params.each do ...
         
         if @advance.advance_type.eql? 3 # seminar
-          avg = sum/counter rescue nil
-
-          if avg>70
-            @protocol.grade_status = 1
-          end
+          avg = sum/counter
+ 
+          if !@protocol.status.to_i.eql? 4
+            if reprobate
+              @protocol.grade_status = 2
+            else
+              if avg>70
+                @protocol.grade_status = 1
+              else
+                @protocol.grade_status = 2
+              end
+            end
+          end#@protocol.status
 
           @protocol.grade = avg
           @protocol.save
@@ -409,9 +433,29 @@ class StaffsController < ApplicationController
         send_email(@advance,2,address,parameters)
       end
 
+      parameters[:status] = @protocol.status
       render_message @protocol,"Evaluación enviada",parameters
     else
       render_error @protocol,"Error al crear/editar protocolo",parameters,nil
+    end
+  end
+
+  def recomm_protocol
+    parameters = {}
+
+    @protocol = Protocol.find(params[:protocol_id])
+    
+    if params[:recom].to_i.eql? 1
+      @protocol.grade_status = 1
+    elsif params[:recom].to_i.eql? 2
+      @protocol.grade_status = 2
+    end
+
+    if @protocol.save
+      parameters[:grade_status] = @protocol.grade_status
+      render_message @protocol,"Protocolo actualizado",parameters
+    else
+      render_error @protocol,"Error al editar protocolo",parameters,nil
     end
   end
 
@@ -629,6 +673,8 @@ class StaffsController < ApplicationController
       
     tabla = pdf.make_table(data,:width=>300,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:left,:column_widths=>[30,270])
     tabla.draw
+
+    pdf.text "\nCon promedio de #{protocol.grade}"
 
     pdf.render_file "#{pdf_route}"
   end
