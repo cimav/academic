@@ -44,7 +44,6 @@
       = q.order.to_s + ". " + q.question+":"
       = hidden_field_tag "question_id_#{q.id}", q.id
       .answer
-        q.question_type.to_i
         - if q.question_type.to_i.eql? 1 ## multiple options
           %br
             - selected = (answer.answer.to_i.eql? 4) ? true : false rescue false
