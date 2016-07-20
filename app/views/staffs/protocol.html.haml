@@ -40,7 +40,7 @@
     - answer = Answer.where(:question_id=>q.id,:protocol_id=>@protocol.id)[0] rescue nil
     %p="&nbsp;".html_safe
     %p="&nbsp;".html_safe
-    .question{:id=>"question_#{q.id}"}
+    .question{:id=>"question_#{q.id}",:q_type=>q.question_type}
       = q.order.to_s + ". " + q.question+":"
       = hidden_field_tag "question_id_#{q.id}", q.id
       .answer
@@ -72,16 +72,16 @@
       
   %p="&nbsp;".html_safe
   %p="&nbsp;".html_safe
-  .question
+  .question{:q_type=>'grade'}
     = "Resultado:"
     .answer
       %br
         - selected = (@protocol.grade.to_i.eql? 1) ? true: false rescue false
-        = radio_button_tag "grade",1, selected, :disabled=>@disabled
+        = radio_button_tag "grade_status",1, selected, :disabled=>@disabled
         = "Aprobado"
       %br
         - selected = (@protocol.grade.to_i.eql? 2) ? true: false rescue false
-        = radio_button_tag "grade",2, selected, :disabled=>@disabled
+        = radio_button_tag "grade_status",2, selected, :disabled=>@disabled
         = "No aprobado"
       
   %p="&nbsp;".html_safe
