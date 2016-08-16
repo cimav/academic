@@ -630,7 +630,7 @@ class StaffsController < ApplicationController
       pdf.text text, :size=>size, :style=>:bold
 
       data = []
-      if question.question_type.eql? 1  ## multiple option
+      if question.question_type.to_i.eql? 1  ## multiple option
         (a.answer.eql? 4) ? content1 = icon_ok : content1 = icon_empty
         data << [content1,"Excelente"]
         (a.answer.eql? 3) ? content1 = icon_ok : content1 = icon_empty
@@ -639,10 +639,10 @@ class StaffsController < ApplicationController
         data << [content1,"Regular"]
         (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
         data << [content1,"Deficiente"]
-      elsif question.question_type.eql? 2 ## text
-        answer = a.answer rescue "n.d."
+      elsif question.question_type.to_i.eql? 2 ## text
+        answer = a.comments rescue "n.d."
         data << [{:content=>"#{answer}",:colspan=>2}]
-      elsif question.question_type.eql? 3 ## grade
+      elsif question.question_type.to_i.eql? 3 ## grade
         answer = a.answer rescue "n.d."
         data << [{:content=>"#{answer}",:colspan=>2}]
       end
