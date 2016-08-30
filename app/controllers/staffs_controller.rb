@@ -696,7 +696,7 @@ class StaffsController < ApplicationController
       content = "{:email=>\"#{address}\",:view=>19,:student_id=>#{params[:student_id]}}"
       @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Seminario con recomendaciones",:content=>content,:status=>0})
     elsif opc.eql? 5
-      content = "{:email=>\"#{address}\",:view=>20}"
+      content = "{:email=>\"#{address}\",:view=>20,:advance_id=>#{advance.id}}"
       @email = Email.new({:from=>"atencion.posgrado@cimav.edu.mx",:to=>address,:subject=>"Seminario con recomendaciones",:content=>content,:status=>0})
     end
 
