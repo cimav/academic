@@ -594,13 +594,19 @@ class StaffsController < ApplicationController
     pdf = Prawn::Document.new(:margin=>[20,43,43,43])
     size = 14
 
-    pdf.move_down 30
-    text = "FORMATO P-MA-E"
-    pdf.text text, :size=>size, :style=> :bold, :align=> :center
+    if advance.advance_type.eql? 2
+      pdf.move_down 30
+      text = "FORMATO P-MA-E"
+      pdf.text text, :size=>size, :style=> :bold, :align=> :center
 
-    pdf.move_down 1
-    text = "EVALUACIÓN PROTOCOLOS"
-    pdf.text text ,:size=>size, :style=> :bold, :align=> :center
+      pdf.move_down 1
+      text = "EVALUACIÓN PROTOCOLOS"
+      pdf.text text ,:size=>size, :style=> :bold, :align=> :center
+    elsif advance.advance_type.eql? 3
+      pdf.move_down 31
+      text = "SEMINARIO FINAL"
+      pdf.text text ,:size=>size, :style=> :bold, :align=> :center
+    end
 
     size = 11
     
