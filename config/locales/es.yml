@@ -103,3 +103,5 @@ es:
         two_words_connector: " y "
         last_word_connector: ", y "
         
+  sign_in_with_your_existing_account: "Iniciar sesión con tu cuenta existente"
+
