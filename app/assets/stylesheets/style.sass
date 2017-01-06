@@ -1,0 +1,75 @@
+$coolBlueDark: #003C61
+$coolBlueSoft: #104778
+$coolYellow: #FF9901
+$coolDark: #454545
+$coolWhite: #FFFEFF
+$bgHighlight    : #cddce4
+$colDefault     : #ffffff
+$colHighlight   : #ffffff
+$dropDown       : false
+.navbar-default
+  background-color: $coolBlueDark
+  border-color: $bgHighlight
+  .navbar-brand
+    color: $colDefault
+    &:hover, &:focus
+      color: $colHighlight
+  .navbar-text
+    color: $colDefault
+  .navbar-nav
+    > li
+      > a
+        color: $colDefault
+        &:hover, &:focus
+          color: $colHighlight
+      @if $dropDown
+        > .dropdown-menu
+          background-color: $coolBlueDark
+          > li
+            > a
+              color: $colDefault
+              &:hover, &:focus
+                color: $colHighlight
+                background-color: $bgHighlight
+            > .divider
+              background-color: $bgHighlight
+    @if $dropDown
+      .open .dropdown-menu > .active
+        > a, > a:hover, > a:focus
+          color: $colHighlight
+          background-color: $bgHighlight
+    > .active
+      > a, > a:hover, > a:focus
+        color: $colHighlight
+        background-color: $bgHighlight
+    > .open
+      > a, > a:hover, > a:focus
+        color: $colHighlight
+        background-color: $bgHighlight
+  .navbar-toggle
+    border-color: $bgHighlight
+    &:hover, &:focus
+      background-color: $bgHighlight
+    .icon-bar
+      background-color: $colDefault
+  .navbar-collapse,
+  .navbar-form
+    border-color: $colDefault
+  .navbar-link
+    color: $colDefault
+    &:hover
+      color: $colHighlight
+@media (max-width: 767px)
+
+
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus
+  background-color: #cddce4
+  color: #ebfffa
+
+
+.header-format
+  background-color: $coolDark
+  font-weight: 900
+  height: 10px
+  color: $coolWhite
+  //text-transform: capitalize

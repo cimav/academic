@@ -14,49 +14,49 @@
         = javascript_include_tag js
     = csrf_meta_tag
   %body
-    #standalone-content
-      #top-bar 
-        #nav-select 
-          = "Académicos CIMAV"
-        #account
-          = "["
-          %a{'href' => "/logout"}= "salir"
-          = "]"
-      #menu
-        %br
-        %br
-        %br
-        %center
-          - if @staff.image_url.nil?
-            = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/medium_default.jpg", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"Buscando imagen...", :align=>"center"
-          - else
-            %div{:style=>"width:100px;height:100px;border: 1px solid #EEEEEE"}
-              = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url(:medium)}", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"x", :align=>"center"
-          %br
-          %strong= "#{@staff.first_name} #{@staff.last_name}"
+    .row
+      .navbar.navbar-default
+        .container-fluid
+          .navbar-header
+            %p.navbar-brand Académicos CIMAV
+          %ul.nav.navbar-nav.navbar-right
+            %li
+              %a{:href => "/logout"}
+                %span.glyphicon.glyphicon-log-out
+                salir
+
+      .container-fluid
+
+        .col-xs-2.hidden-xs.hidden-sm
           %br
           %br
-        #menu-bar
-          %a.menu{'href' => "/"}= "  Inicio"
-          - if @screen=="index"
-            = image_tag "/assets/left-arrow-blue.png"
           %br
-          %a.menu{'href' => "/horarios"}= "  Horarios"
-          - if @screen=="schedule_table"
-            = image_tag "/assets/left-arrow-blue.png"
-          %br
-          %a.menu{'href' => "/alumnos"}= "  Alumnos"
-          - if @screen=="students"
-            = image_tag "/assets/left-arrow-blue.png"
-          %br
-          %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
-          - if @screen=="grades"
-            = image_tag "/assets/left-arrow-blue.png"
-          %br
-          %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
-          - if @screen=="enrollments"
-            = image_tag "/assets/left-arrow-blue.png"
-          %br
-      #content
-        = yield
+          %center
+            - if @staff.image_url.nil?
+              = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/medium_default.jpg", :id => "img-medium-#{@staff.id}", :class=> "img-medium", :width=>"100px", :height=>"100px", :alt=>"Buscando imagen...", :align=>"center"
+            - else
+              %div{:style=>"width:100px;height:100px;border: 1px solid #EEEEEE"}
+                = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url(:medium)}", :id => "img-medium-#{@staff.id}", :class=> "img-medium img-thumbnail", :width=>"100px", :height=>"100px", :alt=>"x", :align=>"center"
+            %br
+            %strong= "#{@staff.first_name} #{@staff.last_name}"
+            %br
+            %br
+          %ul.nav.nav-pills.nav-stacked
+            %li{:class => active_class(root_path)}
+              %a.menu{'href' => "/"}= "  Inicio"
+
+            %li{:class => active_class("/horarios")}
+              %a.menu{'href' => "/horarios"}= "  Horarios"
+
+            %li{:class => active_class("/alumnos")}
+              %a.menu{'href' => "/alumnos"}= "  Alumnos"
+
+            %li{:class => active_class("/calificaciones")}
+              %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
+
+            %li#inscripciones-tab{:class => active_class("/inscripciones")}
+              %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
+
+        .col-xs-10
+          = yield
 
