@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+  helper_method :set_current_user
 
   def not_found
     raise ActionController::RoutingError.new('Not Found')
@@ -75,11 +76,26 @@ class ApplicationController < ActionController::Base
     months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
     name = months[number - 1]
     return name
-  end 
+  end
 
+  def set_current_user
+    #raise "No se permite esta operación" if !current_user.is_admin?
+    staff = Staff.find(params[:id])
+    email = staff.email
+    @current_user = Staff.where(:email => email).first
+    puts email
+    session[:user_email] = email
+    session[:user_auth]  = nil
+    puts "Ahora es: #{@current_user.full_name}"
+    redirect_to root_url
+  end
 
   private
   def current_user
     @current_user ||= Staff.find(session[:user_id]) if session[:user_id]
   end
+
+
+
+
 end
