@@ -1,21 +1,20 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
-  helper_method :set_current_user
 
   def not_found
     raise ActionController::RoutingError.new('Not Found')
   end
-
   def authenticated?
     if session[:user_email].blank?
       return false
     end
-
     if session[:user_auth].blank?
-      user = Staff.where("(email = ? ) AND status = ?",session[:user_email], Staff::ACTIVE).first
 
+      user = Staff.where("(email = ? ) AND status = ?",session[:user_email], Staff::ACTIVE).first || User.where(:email => session[:user_email], :access => User::MANAGER).first
+      is_admin?(user.email) #set user as administrator
       session[:user_auth] = user && ( user.email == session[:user_email] || user.email_cimav == session[:user_email])
+
       if session[:user_auth]
         session[:user_id] = user.id
       end
@@ -78,17 +77,30 @@ class ApplicationController < ActionController::Base
     return name
   end
 
-  def set_current_user
-    #raise "No se permite esta operación" if !current_user.is_admin?
-    staff = Staff.find(params[:id])
-    email = staff.email
-    @current_user = Staff.where(:email => email).first
-    puts email
-    session[:user_email] = email
-    session[:user_auth]  = nil
-    puts "Ahora es: #{@current_user.full_name}"
-    redirect_to root_url
+  def is_admin?(email)
+    if User.where(:email => email, :access => User::MANAGER).first
+      session[:is_admin] = true
+    end
   end
+  helper_method :is_admin?
+
+  def set_current_user
+    if session[:is_admin]
+      staff = Staff.find(params[:id])
+      email = staff.email
+      @current_user = Staff.where(:email => email).first
+      session[:user_email] = email
+      session[:user_auth]  = nil
+      puts "Ahora es: #{@current_user.full_name}"
+      puts session[:user_email].to_s
+      puts session[:user_id].to_s
+
+    else
+      puts "No tiene permisos para esa acción"
+    end
+    redirect_to root_path
+  end
+  helper_method :set_current_user
 
   private
   def current_user

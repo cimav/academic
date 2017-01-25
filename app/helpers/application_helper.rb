@@ -4,7 +4,7 @@ module ApplicationHelper
   end
 
   def get_all_staffs
-    return @all_staffs = Staff.where(:email => !'').where(:status => 0)
+    return @all_staffs = Staff.where(:email => !'').where(:status => Staff::ACTIVE)
   end
 
 end

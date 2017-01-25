@@ -30,14 +30,15 @@
         #bs-example-navbar-collapse-1.collapse.navbar-collapse
           %ul.nav.navbar-nav
 
-            %li.dropdown
-              %a.dropdown-toggle{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "#", :role => "button"}
-                Ver como:
-                %span.caret
-              %ul.dropdown-menu
-                - get_all_staffs.each do |staff|
-                  %li
-                    = link_to staff.full_name, "/set_user/"+staff.id.to_s
+            - if session[:is_admin]
+              %li.dropdown
+                %a.dropdown-toggle{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "#", :role => "button"}
+                  Ver como:
+                  %span.caret
+                %ul.dropdown-menu.scrollable-menu
+                  - get_all_staffs.each do |staff|
+                    %li
+                      = link_to staff.full_name, "/set_user/"+staff.id.to_s
           %ul.nav.navbar-nav.navbar-right
             %li
               %a{:href => "/logout"}
