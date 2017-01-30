@@ -36,6 +36,9 @@
                   Ver como:
                   %span.caret
                 %ul.dropdown-menu.scrollable-menu
+                  %li
+                    #scrollable-dropdown-menu
+                      %input#test.form-control.typehead{:placeholder => "Buscar por nombre:", data: {autocomplete_source: get_all_staffs.to_json}}
                   - get_all_staffs.each do |staff|
                     %li
                       = link_to staff.full_name, "/set_user/"+staff.id.to_s

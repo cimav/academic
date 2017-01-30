@@ -26,6 +26,7 @@ Academic::Application.routes.draw do
   match '/protocolo/guardar' => 'staffs#save_protocol'
   match '/protocolo/recomm/:protocol_id' => 'staffs#recomm_protocol'
   get '/set_user/:id' => 'application#set_current_user'
+  get '/staffs' => 'application#get_all_staffs'
 
   resources :student_advances_file_messages, :path=>'/avances/mensajes'
 end

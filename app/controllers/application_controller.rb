@@ -84,6 +84,12 @@ class ApplicationController < ActionController::Base
   end
   helper_method :is_admin?
 
+  def get_all_staffs
+    @all_staffs = Staff.where(:email => !"", :status => Staff::ACTIVE)
+    return @all_staffs
+  end
+  helper_method :get_all_staffs
+
   def set_current_user
     if session[:is_admin]
       staff = Staff.find(params[:id])
