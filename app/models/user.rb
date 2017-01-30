@@ -34,6 +34,8 @@ class User < ActiveRecord::Base
     ACCESS_TYPE[access]
   end
 
+
+
   #def delete_permissions
   #  PermissionUser.delete_all(:user_id => self.id)
   #end

@@ -50,36 +50,38 @@
 
 -if @staff.supervised.where(:status => Student::GRADUATED).count > 0 || @staff.co_supervised.where(:status => Student::GRADUATED).count > 0
   %h2 Estudiantes graduados
-  %table.formatted-table.students_graduated
-    %tbody
-      %tr.header
-        %th Nombre
-        %th Programa
-        %th Campus
-        %th Inicio
-        %th Defensa Tesis
-        %th Asesor
-        %th Co-Asesor
-      - @staff.supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
-        %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
-          %td= supervised.full_name
-          %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
-          %td= l supervised.start_date, :format => :short
-          %td= ""
-          =# %td=# l supervised.thesis.defence_date, :format => :short
-          %td= supervised.staff_supervisor.full_name rescue ''
-          %td= supervised.staff_co_supervisor.full_name rescue ''
-      - @staff.co_supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
-        %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
-          %td= supervised.full_name
-          %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
-          %td= l supervised.start_date, :format => :short
-          %td= ""
-          =#%td= l supervised.thesis.defence_date, :format => :short
-          %td= supervised.staff_supervisor.full_name rescue ''
-          %td= supervised.staff_co_supervisor.full_name rescue ''
+  .table-responsive
+    %table.table.table-striped.table-condensed.table-bordered
+      %thead
+        %tr.header-format
+          %th.col-xs-3 Nombre
+          %th.col-xs-2 Programa
+          %th.col-xs-1 Campus
+          %th.col-xs-1 Inicio
+          %th.col-xs-1 Defensa Tesis
+          %th.col-xs-2 Asesor
+          %th.col-xs-2 Co-Asesor
+      %tbody
+        - @staff.supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
+          %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
+            %td= supervised.full_name
+            %td= supervised.program.name
+            %td= supervised.campus.name rescue ''
+            %td= l supervised.start_date, :format => :short
+            %td= ""
+            =# %td=# l supervised.thesis.defence_date, :format => :short
+            %td= supervised.staff_supervisor.full_name rescue ''
+            %td= supervised.staff_co_supervisor.full_name rescue ''
+        - @staff.co_supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
+          %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
+            %td= supervised.full_name
+            %td= supervised.program.name
+            %td= supervised.campus.name rescue ''
+            %td= l supervised.start_date, :format => :short
+            %td= ""
+            =#%td= l supervised.thesis.defence_date, :format => :short
+            %td= supervised.staff_supervisor.full_name rescue ''
+            %td= supervised.staff_co_supervisor.full_name rescue ''
 
 %h2 Avances de comite tutoral
 - advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date AND advance_type=1",:id=>current_user.id,:date=>Date.today - 300.days)
@@ -87,7 +89,7 @@
 - if advs.size == 0 
   = "No hay avances que mostrar"
 - else 
-  %table.formatted-table.students_active
+  %table.table.formatted-table.table-hover
     %tbody
       %tr.header
         %th Nombre
@@ -121,7 +123,7 @@
 - if advs.size == 0 
   = "No hay avances que mostrar"
 - else 
-  %table.formatted-table.students_active
+  %table.table.formatted-table.table-hover
     %tbody
       %tr.header
         %th Nombre

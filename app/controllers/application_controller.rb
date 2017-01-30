@@ -5,16 +5,16 @@ class ApplicationController < ActionController::Base
   def not_found
     raise ActionController::RoutingError.new('Not Found')
   end
-
   def authenticated?
     if session[:user_email].blank?
       return false
     end
-
     if session[:user_auth].blank?
-      user = Staff.where("(email = ? ) AND status = ?",session[:user_email], Staff::ACTIVE).first
 
+      user = Staff.where("(email = ? ) AND status = ?",session[:user_email], Staff::ACTIVE).first || User.where(:email => session[:user_email], :access => User::MANAGER).first
+      is_admin?(user.email) #set user as administrator
       session[:user_auth] = user && ( user.email == session[:user_email] || user.email_cimav == session[:user_email])
+
       if session[:user_auth]
         session[:user_id] = user.id
       end
@@ -75,11 +75,45 @@ class ApplicationController < ActionController::Base
     months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
     name = months[number - 1]
     return name
-  end 
+  end
 
+  def is_admin?(email)
+    if User.where(:email => email, :access => User::MANAGER).first
+      session[:is_admin] = true
+    end
+  end
+  helper_method :is_admin?
+
+  def get_all_staffs
+    @all_staffs = Staff.where(:email => !"", :status => Staff::ACTIVE)
+    return @all_staffs
+  end
+  helper_method :get_all_staffs
+
+  def set_current_user
+    if session[:is_admin]
+      staff = Staff.find(params[:id])
+      email = staff.email
+      @current_user = Staff.where(:email => email).first
+      session[:user_email] = email
+      session[:user_auth]  = nil
+      puts "Ahora es: #{@current_user.full_name}"
+      puts session[:user_email].to_s
+      puts session[:user_id].to_s
+
+    else
+      puts "No tiene permisos para esa acción"
+    end
+    redirect_to root_path
+  end
+  helper_method :set_current_user
 
   private
   def current_user
     @current_user ||= Staff.find(session[:user_id]) if session[:user_id]
   end
+
+
+
+
 end
