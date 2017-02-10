@@ -65,7 +65,7 @@ class ApplicationController < ActionController::Base
           json[:params] = parameters
           render :json => json
         else
-          redirect_to object
+          redirect_to "/calificaciones"
         end
       end
     end
