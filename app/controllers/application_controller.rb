@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   def not_found
     raise ActionController::RoutingError.new('Not Found')
   end
+
   def authenticated?
     if session[:user_email].blank?
       return false
@@ -65,7 +66,7 @@ class ApplicationController < ActionController::Base
           json[:params] = parameters
           render :json => json
         else
-          redirect_to "/calificaciones"
+          redirect_to object
         end
       end
     end
@@ -112,8 +113,4 @@ class ApplicationController < ActionController::Base
   def current_user
     @current_user ||= Staff.find(session[:user_id]) if session[:user_id]
   end
-
-
-
-
 end

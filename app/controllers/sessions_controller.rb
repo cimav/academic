@@ -5,7 +5,7 @@ class SessionsController < ApplicationController
     if authenticated?
       redirect_to '/'
     else
-      render :text => '401 Unauthorized ', :status => 401
+      render :text => '401 Unauthorized', :status => 401
     end
   end
 
