@@ -1,24 +1,30 @@
 !!!
+
 %html
   %head
     %title= @page_title || 'Académicos CIMAV'
     = stylesheet_link_tag "custom-theme/jquery-ui"
     = stylesheet_link_tag "application"
+
+
     - if !@include_css.nil?
       - @include_css.each do |css|
         = stylesheet_link_tag css
     /[if lt IE 8]
     = javascript_include_tag "application"
+
+
     - if !@include_js.nil?
       - @include_js.each do |js|
         = javascript_include_tag js
     = csrf_meta_tag
-    %script{:src => "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js", :type => "text/javascript"}
-    %script{:crossorigin => "anonymous", :integrity => "sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa", :src => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"}
+    %link{:crossorigin => "anonymous", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", :integrity => "sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u", :rel => "stylesheet"}/
 
+    /%link{:href => "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css", :rel => "stylesheet"}
+    /%link{:href => "http://fonts.googleapis.com/icon?family=Material+Icons", :rel => "stylesheet"}/
   %body
 
-    %nav.navbar.navbar-default
+    %nav.navbar.navbar-default.navbar-fixed-top
       .container-fluid
         .navbar-header
           %button.navbar-toggle.collapsed{"aria-expanded" => "false", "data-target" => "#bs-example-navbar-collapse-1", "data-toggle" => "collapse", :type => "button"}
@@ -29,62 +35,56 @@
           %a.navbar-brand{:href => "/"} Académicos CIMAV
         #bs-example-navbar-collapse-1.collapse.navbar-collapse
           %ul.nav.navbar-nav
-
-            - if session[:is_admin]
-              %li.dropdown
-                %a.dropdown-toggle{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "#", :role => "button"}
-                  Ver como:
-                  %span.caret
-                %ul.dropdown-menu.scrollable-menu
-                  %li
-                    #scrollable-dropdown-menu
-                      %input#test.form-control.typehead{:placeholder => "Buscar por nombre:", data: {autocomplete_source: get_all_staffs.to_json}}
-                  - get_all_staffs.each do |staff|
-                    %li
-                      = link_to staff.full_name, "/set_user/"+staff.id.to_s
           %ul.nav.navbar-nav.navbar-right
             %li
               %a{:href => "/logout"}
                 %span.glyphicon.glyphicon-log-out
                 salir
 
-
-
     .container-fluid
+      .row.content
+        .col-md-2.sidebar-nav-fixed
+          .sidebar-nav-fixed.affix
+            %br
+            %br
+            %br
+            %center
+              - if @staff.image_url.equal? nil
+                %div{:style=>"width:200px;height:200px;border: 0px solid #EEEEEE"}
+                  = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/default.jpg",:id => "img-medium-#{@staff.id}", :class=> "img-circle", :width=>"200px", :height=>"200px", :alt=>"Buscando imagen...", :align=>"center"
+              - else
+                %div{:style=>"width:200px;height:200px;border: 0px solid #EEEEEE"}
+                  = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url}", :id => "img-medium-#{@staff.id}", :class=> "img-circle", :width=>"200px", :height=>"200px", :alt=>"x", :align=>"center"
+              %br
+              %strong= "#{@staff.first_name} #{@staff.last_name}"
+              %br
+              %br
+            %ul.nav.nav-pills.nav-stacked
+              %li{:class => active_class(root_path)}
+                %a.menu{'href' => "/"}= "  Inicio"
 
-      .col-xs-2.hidden-xs.hidden-sm
-        %br
-        %br
-        %br
-        %center
-          - if @staff.image_url.equal? nil
-            %div{:style=>"width:200px;height:200px;border: 0px solid #EEEEEE"}
-              = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/default.jpg",:id => "img-medium-#{@staff.id}", :class=> "img-circle", :width=>"200px", :height=>"200px", :alt=>"Buscando imagen...", :align=>"center"
-          - else
-            %div{:style=>"width:200px;height:200px;border: 0px solid #EEEEEE"}
-              = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url}", :id => "img-medium-#{@staff.id}", :class=> "img-circle", :width=>"200px", :height=>"200px", :alt=>"x", :align=>"center"
-          %br
-          %strong= "#{@staff.first_name} #{@staff.last_name}"
-          %br
-          %br
-        %ul.nav.nav-pills.nav-stacked
-          %li{:class => active_class(root_path)}
-            %a.menu{'href' => "/"}= "  Inicio"
+              %li{:class => active_class("/horarios")}
+                %a.menu{'href' => "/horarios"}= "  Horarios"
 
-          %li{:class => active_class("/horarios")}
-            %a.menu{'href' => "/horarios"}= "  Horarios"
+              %li{:class => active_class("/alumnos")}
+                %a.menu{'href' => "/alumnos"}= "  Alumnos"
 
-          %li{:class => active_class("/alumnos")}
-            %a.menu{'href' => "/alumnos"}= "  Alumnos"
+              %li{:class => active_class("/calificaciones")}
+                %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
 
-          %li{:class => active_class("/calificaciones")}
-            %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
+              %li#inscripciones-tab{:class => active_class("/inscripciones")}
+                %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
+              - if session[:is_admin]
+                - staff_options = "<option value=\"0\">Ver como:</option>"
+                %li
+                - get_all_staffs.each do |staff|
+                  - staff_options += "<option value=\"#{staff.id}\">#{staff.full_name}</option>"
+                = select_tag "ver_como", staff_options.html_safe, :onchange => "window.location.replace('/set_user/'+this.value);", :class=>"ver-como", :style =>"width: 100%; margin-top: 4px;"
 
-          %li#inscripciones-tab{:class => active_class("/inscripciones")}
-            %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
-
-      .col-xs-10
-        = yield
-
-
-
+        .col-md-10.content
+          .container
+            = yield
+:javascript
+  $(document).ready(function(){
+    $('.ver-como').select2();
+  });

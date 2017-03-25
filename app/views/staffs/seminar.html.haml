@@ -110,6 +110,7 @@
 
   %p="&nbsp;".html_safe
   = button_tag "Enviar",:id=>"protocol-send",:value=>"send",:class=>"button",:disabled=>@disabled
+
   = image_tag "/images/ajax-load2.gif", :id=> "img_load" , :align=> 'center',:style=>'display:none;',:width=>20
   #messages{:style=>'display:inline-block'}
   
@@ -129,7 +130,7 @@
         = radio_button_tag "recom",2,selected,:disabled=>@disabled_recom
         = "No"
       %br
-        = button_tag "Enviar",:id=>"recom-send",:class=>"button",:disabled=>@disabled_recom,:type=>:button
+        = button_tag "Enviar",:id=>"recom-send",:class=>"btn btn-large button ",:disabled=>@disabled_recom,:type=>:button
 
 :javascript
   $(document).ready(function(){

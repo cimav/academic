@@ -1,6 +1,6 @@
 %h2="Calificaciones (avance programatico)"
 -if @access
-  - advance = Advance.joins(:student=>[:term_students=>:term]).joins(:student=>:program).where("terms.status=? AND curdate() between terms.grade_start_date AND terms.grade_end_date AND advances.id=?",3,@advance.id)
+  - advance = Advance.joins(:student=>[:term_students=>:term]).joins(:student=>:program).where("terms.status=? AND curdate() between terms.grade_start_date AND terms.grade_end_date AND advances.id=? AND advances.status in (?)",3,@advance.id,['P'])
   - if !advance.size.eql? 0
     - disabled = false
     - grade = nil
@@ -61,4 +61,4 @@
   - else
     = "No estamos en fechas de calificaciones"
 -else
-  = "Usted no es tutor en este avance"
+  = "Usted no es tiene acceso a este avance"

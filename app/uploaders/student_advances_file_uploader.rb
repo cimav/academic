@@ -16,7 +16,7 @@ class StudentAdvancesFileUploader < CarrierWave::Uploader::Base
   # Override the directory where uploaded files will be stored.
   # This is a sensible default for uploaders that are meant to be mounted:
   def store_dir
-    route = ""
+    route = "/home/rails/sapos/private/files/student_advances/"
     "#{route}#{model.term_student_id}_#{model.student_advance_type}"
   end
 
