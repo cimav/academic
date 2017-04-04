@@ -111,7 +111,7 @@
   %p="&nbsp;".html_safe
   = button_tag "Enviar",:id=>"protocol-send",:value=>"send",:class=>"button",:disabled=>@disabled
 
-  = image_tag "/images/ajax-load2.gif", :id=> "img_load" , :align=> 'center',:style=>'display:none;',:width=>20
+  = image_tag "ajax-load2.gif", :id=> "img_load" , :align=> 'center', :width=>20, :alt=>"Subiendo datos...",:style=>'display:none;'
   #messages{:style=>'display:inline-block'}
   
 .recommendation{:style=>"display: #{@display_recom};"}
