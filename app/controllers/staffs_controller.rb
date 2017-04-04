@@ -288,6 +288,18 @@ class StaffsController < ApplicationController
       return
     end
 
+    if @staff.id.to_i.eql? @advance.tutor1.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor2.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor3.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor4.to_i
+      @access = true
+    elsif @staff.id.to_i.eql? @advance.tutor5.to_i
+      @access = true
+    end
+
     if @advance.advance_type.to_i.eql? Advance::PROTOCOL
       @include_js = ["protocol"] 
       @protocol   = Protocol.where(:advance_id=>@advance.id,:staff_id=>@staff.id)[0]
@@ -306,17 +318,6 @@ class StaffsController < ApplicationController
  
     @advances    = Advance.where(:student_id=>@advance.student_id, :status=>'C').order("advance_date")
 
-    if @staff.id.to_i.eql? @advance.tutor1.to_i
-      @access = true
-    elsif @staff.id.to_i.eql? @advance.tutor2.to_i
-      @access = true
-    elsif @staff.id.to_i.eql? @advance.tutor3.to_i
-      @access = true
-    elsif @staff.id.to_i.eql? @advance.tutor4.to_i
-      @access = true
-    elsif @staff.id.to_i.eql? @advance.tutor5.to_i
-      @access = true
-    end
   end
 
   def save_protocol

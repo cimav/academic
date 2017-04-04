@@ -1,138 +1,142 @@
-- @include_js  << "select2"
-- @include_js  << "select2_locale_es"
-- @include_css  = Array.new
-- @include_css << "select2/select2"
-
-- @access                = (@protocol.grade_status.to_i.in? [1,2]) ? true : false  rescue false
-- @access_recom          = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 3)) ? true : false rescue false
-- @access_recom_disabled = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.in? [1,2])) ? true : false rescue false
-
-- if @access
-  - @disabled = true
+- if !@access
+  = "Sin acceso"
 - else
-  - @disabled = false
-
-- if @access_recom
-  - @disabled       = true
-  - @display_recom  = "block"
-  - @disabled_recom = false
-- else
-  - @disabled_recom = true
-  - @display_recom  = "none"
-
-- if @access_recom_disabled
-  - @display_recom   = "block"
-
-
-%h2="Evaluación de seminario"
-- if @disabled
-  = "(Evaluación de seminario ya realizada)"
-
-%p="&nbsp;".html_safe
-.protocol-head
-  .row
-    .label
-      = "Alumno:"
-    .text
-      = @advance.student.full_name
-    .label
-  .row
-    .label
-      = "Título:"
-    .text
-      =@advance.title
-  .row
-    .label
-      = "Programa:"
-    .text
-      = @advance.student.program.name
-  .row
-    .label
-      = "Director de Tesis:"
-    .text
-      = Staff.find(@advance.student.supervisor.to_i).full_name rescue "N.D"
-  .row
-    .labe
-      = "&nbsp;".html_safe
-    .text{:style=>"color: red;"}
-      = "* Debe calificarse en una escala del 0 al 100"
-
-=form_tag "/protocolo/guardar", :remote=>true, :id=>"protocol-form", :name=>"protocol-form"
-= hidden_field_tag "advance_id", @advance.id
-= hidden_field_tag "protocol_id", (@protocol.id rescue 0)
-.questions
-  - @questions.each do |q|
-    - answer = Answer.where(:question_id=>q.id,:protocol_id=>@protocol.id)[0] rescue nil
-    %p="&nbsp;".html_safe
-    %p="&nbsp;".html_safe
-    .question{:id=>"question_#{q.id}",:q_type=>q.question_type}
-      = q.order.to_s + ". " + q.question+":"
-      = hidden_field_tag "question_id_#{q.id}", q.id
-      = hidden_field_tag "question_type_#{q.id}", q.question_type
-      .answer
-        - if q.question_type.to_i.eql? 1
-          %br
-            - selected = (answer.answer.to_i.eql? 4) ? true : false rescue false
-            = radio_button_tag "radio_button_#{q.id}",4, selected, :disabled=>@disabled
-            = "Excelente"
-          %br
-            - selected = (answer.answer.to_i.eql? 3) ? true : false rescue false
-            = radio_button_tag "radio_button_#{q.id}",3, selected, :disabled=>@disabled
-            = "Bien"
-          %br
-            - selected = (answer.answer.to_i.eql? 2) ? true : false rescue false
-            = radio_button_tag "radio_button_#{q.id}",2, selected, :disabled=>@disabled
-            = "Regular"
-          %br
-            - selected = (answer.answer.to_i.eql? 1) ? true : false rescue false
-            = radio_button_tag "radio_button_#{q.id}",1, selected, :disabled=>@disabled
-            = "Deficiente"
-        - elsif q.question_type.to_i.eql? 2 ## open text
-          %br
-            - text = answer.comments rescue nil
-            = text_area_tag "text_area_#{q.id}", text, :rows=>12, :cols=>80,  :disabled=>@disabled, :class=>"text_area_a"
-        - elsif q.question_type.to_i.eql? 3 ## 0-100 scale
-          %br
-            - answer   = answer.answer.to_i rescue ""
-            = select_tag "radio_button_#{q.id}",options_for_select((0..100).to_a,answer), :prompt=> "----",:class=>"scale",:disabled=>@disabled
-            = "*"
-            
-  .question{:q_type=>'grade'}
-    .answer
-      %br
-        - selected = (@protocol.status.to_i.eql? 4) ? true: false rescue false
-        = radio_button_tag "grade_status",1, selected,:class=>"grade_a",:disabled=>@disabled
-        = "Con recomendaciones"
-      %br
-        - selected = (@protocol.status.to_i.in? [1,2,3]) ? true: false rescue false
-        = radio_button_tag "grade_status",2, selected, :class=>"grade_a",:disabled=>@disabled
-        = "Sin recomendaciones"
-
-  %p="&nbsp;".html_safe
-  = button_tag "Enviar",:id=>"protocol-send",:value=>"send",:class=>"button",:disabled=>@disabled
-
-  = image_tag "ajax-load2.gif", :id=> "img_load" , :align=> 'center', :width=>20, :alt=>"Subiendo datos...",:style=>'display:none;'
-  #messages{:style=>'display:inline-block'}
+  - @include_js  << "select2"
+  - @include_js  << "select2_locale_es"
+  - @include_css  = Array.new
+  - @include_css << "select2/select2"
   
-.recommendation{:style=>"display: #{@display_recom};"}
+  
+  - @access                = (@protocol.grade_status.to_i.in? [1,2]) ? true : false  rescue false
+  - @access_recom          = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 3)) ? true : false rescue false
+  - @access_recom_disabled = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.in? [1,2])) ? true : false rescue false
+  
+  - if @access
+    - @disabled = true
+  - else
+    - @disabled = false
+  
+  - if @access_recom
+    - @disabled       = true
+    - @display_recom  = "block"
+    - @disabled_recom = false
+  - else
+    - @disabled_recom = true
+    - @display_recom  = "none"
+  
+  - if @access_recom_disabled
+    - @display_recom   = "block"
+  
+  
+  %h2="Evaluación de seminario"
+  - if @disabled
+    = "(Evaluación de seminario ya realizada)"
+  
   %p="&nbsp;".html_safe
-  .question{:q_type=>'recom'}
-    = "Los siguientes campos deben ser llenados cuando se haga la revisión de recomendaciones: "
+  .protocol-head
+    .row
+      .label
+        = "Alumno:"
+      .text
+        = @advance.student.full_name
+      .label
+    .row
+      .label
+        = "Título:"
+      .text
+        =@advance.title
+    .row
+      .label
+        = "Programa:"
+      .text
+        = @advance.student.program.name
+    .row
+      .label
+        = "Director de Tesis:"
+      .text
+        = Staff.find(@advance.student.supervisor.to_i).full_name rescue "N.D"
+    .row
+      .labe
+        = "&nbsp;".html_safe
+      .text{:style=>"color: red;"}
+        = "* Debe calificarse en una escala del 0 al 100"
+  
+  =form_tag "/protocolo/guardar", :remote=>true, :id=>"protocol-form", :name=>"protocol-form"
+  = hidden_field_tag "advance_id", @advance.id
+  = hidden_field_tag "protocol_id", (@protocol.id rescue 0)
+  .questions
+    - @questions.each do |q|
+      - answer = Answer.where(:question_id=>q.id,:protocol_id=>@protocol.id)[0] rescue nil
+      %p="&nbsp;".html_safe
+      %p="&nbsp;".html_safe
+      .question{:id=>"question_#{q.id}",:q_type=>q.question_type}
+        = q.order.to_s + ". " + q.question+":"
+        = hidden_field_tag "question_id_#{q.id}", q.id
+        = hidden_field_tag "question_type_#{q.id}", q.question_type
+        .answer
+          - if q.question_type.to_i.eql? 1
+            %br
+              - selected = (answer.answer.to_i.eql? 4) ? true : false rescue false
+              = radio_button_tag "radio_button_#{q.id}",4, selected, :disabled=>@disabled
+              = "Excelente"
+            %br
+              - selected = (answer.answer.to_i.eql? 3) ? true : false rescue false
+              = radio_button_tag "radio_button_#{q.id}",3, selected, :disabled=>@disabled
+              = "Bien"
+            %br
+              - selected = (answer.answer.to_i.eql? 2) ? true : false rescue false
+              = radio_button_tag "radio_button_#{q.id}",2, selected, :disabled=>@disabled
+              = "Regular"
+            %br
+              - selected = (answer.answer.to_i.eql? 1) ? true : false rescue false
+              = radio_button_tag "radio_button_#{q.id}",1, selected, :disabled=>@disabled
+              = "Deficiente"
+          - elsif q.question_type.to_i.eql? 2 ## open text
+            %br
+              - text = answer.comments rescue nil
+              = text_area_tag "text_area_#{q.id}", text, :rows=>12, :cols=>80,  :disabled=>@disabled, :class=>"text_area_a"
+          - elsif q.question_type.to_i.eql? 3 ## 0-100 scale
+            %br
+              - answer   = answer.answer.to_i rescue ""
+              = select_tag "radio_button_#{q.id}",options_for_select((0..100).to_a,answer), :prompt=> "----",:class=>"scale",:disabled=>@disabled
+              = "*"
+              
+    .question{:q_type=>'grade'}
+      .answer
+        %br
+          - selected = (@protocol.status.to_i.eql? 4) ? true: false rescue false
+          = radio_button_tag "grade_status",1, selected,:class=>"grade_a",:disabled=>@disabled
+          = "Con recomendaciones"
+        %br
+          - selected = (@protocol.status.to_i.in? [1,2,3]) ? true: false rescue false
+          = radio_button_tag "grade_status",2, selected, :class=>"grade_a",:disabled=>@disabled
+          = "Sin recomendaciones"
+  
     %p="&nbsp;".html_safe
-    = "Se atendieron las recomendaciones?"
-    .answer
-      %br
-        - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 1)) ? true : false rescue false
-        = radio_button_tag "recom",1,selected,:disabled=>@disabled_recom
-        = "Si"
-      %br
-        - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 2)) ? true : false rescue false
-        = radio_button_tag "recom",2,selected,:disabled=>@disabled_recom
-        = "No"
-      %br
-        = button_tag "Enviar",:id=>"recom-send",:class=>"btn btn-large button ",:disabled=>@disabled_recom,:type=>:button
-
-:javascript
-  $(document).ready(function(){
-    $('.scale').select2();
-  });
+    = button_tag "Enviar",:id=>"protocol-send",:value=>"send",:class=>"button",:disabled=>@disabled
+  
+    = image_tag "ajax-load2.gif", :id=> "img_load" , :align=> 'center', :width=>20, :alt=>"Subiendo datos...",:style=>'display:none;'
+    #messages{:style=>'display:inline-block'}
+    
+  .recommendation{:style=>"display: #{@display_recom};"}
+    %p="&nbsp;".html_safe
+    .question{:q_type=>'recom'}
+      = "Los siguientes campos deben ser llenados cuando se haga la revisión de recomendaciones: "
+      %p="&nbsp;".html_safe
+      = "Se atendieron las recomendaciones?"
+      .answer
+        %br
+          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 1)) ? true : false rescue false
+          = radio_button_tag "recom",1,selected,:disabled=>@disabled_recom
+          = "Si"
+        %br
+          - selected = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 2)) ? true : false rescue false
+          = radio_button_tag "recom",2,selected,:disabled=>@disabled_recom
+          = "No"
+        %br
+          = button_tag "Enviar",:id=>"recom-send",:class=>"btn btn-large button ",:disabled=>@disabled_recom,:type=>:button
+  
+  :javascript
+    $(document).ready(function(){
+      $('.scale').select2();
+    });
