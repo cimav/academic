@@ -3,9 +3,9 @@
 - @include_css  = Array.new
 - @include_css << "select2/select2"
 
-= @access                = (@protocol.grade_status.to_i.in? [1,2]) ? true : false  rescue false
-= @access_recom          = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 3)) ? true : false rescue false
-= @access_recom_disabled = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.in? [1,2])) ? true : false rescue false
+- @access                = (@protocol.grade_status.to_i.in? [1,2]) ? true : false  rescue false
+- @access_recom          = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.eql? 3)) ? true : false rescue false
+- @access_recom_disabled = ((@protocol.status.to_i.eql? 4) && (@protocol.grade_status.to_i.in? [1,2])) ? true : false rescue false
 
 - if @access
   - @disabled = true
