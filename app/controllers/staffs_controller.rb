@@ -15,8 +15,7 @@ class StaffsController < ApplicationController
     @is_pdf = false
     @id     = params[:staff_id]
     
-    @date   = (Date.today+50).strftime("%Y-%m-%d")
-    #@date   = (Date.today+20).strftime("%Y-%m-%d")
+    @date   = (Date.today-20).strftime("%Y-%m-%d")
 
     @tcs  = TermCourseSchedule.joins(:term_course=>:term).where("terms.status in (1,2,3) AND term_course_schedules.status=:status AND term_course_schedules.staff_id=:id AND (terms.start_date<=:date AND terms.end_date>=:date)",{:status=>1,:id=>@staff.id,:date=>@date})
 
