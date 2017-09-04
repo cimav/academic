@@ -41,7 +41,7 @@
                 - elsif access_status.eql? 2
                   = "[Alumno Activo]"
                 - elsif access_status.eql? 3
-                  = "[Esperando materias]"
+                  = "[El alumno está eligiendo materias]"
                 - else
                   = "[Estatus desconocido]"
             .session-staff{:id=>"sstaff_#{s.id}"}= "#{s.program.name} [#{@e_term_name}]"
