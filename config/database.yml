@@ -7,9 +7,9 @@ development:
   adapter: mysql2
   encoding: utf8
   reconnect: false
-  database: 
+  database: sapos_development
   pool: 5
-  username: 
+  username: root
   password: 
 
 # Warning: The database defined as "test" will be erased and

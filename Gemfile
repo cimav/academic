@@ -1,4 +1,4 @@
-#ruby=ruby-2.0.0-p643
+
 source 'https://rubygems.org'
 
 #gem 'rails', '3.2.3'

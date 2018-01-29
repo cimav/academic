@@ -139,7 +139,7 @@ class StaffsController < ApplicationController
     @staff  = Staff.find(current_user.id)
     @today  = Date.today
 
-    @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.start_date <= ? AND terms.end_date >= ?", @staff.id, @today, @today)
+    @tc     = TermCourse.joins(:term).where("term_courses.staff_id=? AND terms.status in (1,2,3) AND terms.grade_start_date <= ? AND terms.grade_end_date >= ?", @staff.id, @today, @today)
 
     #@advances = Advance.joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND (advances.advance_date between terms.start_date and terms.end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id and advance_type=1)",:id=>@staff.id,:level=>[1,2])
     @advances = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND terms.status=3 AND (advances.advance_date between terms.grade_start_date and terms.grade_end_date) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id) and advances.status in (:status)",:id=>@staff.id,:level=>[1,2],:status=>['P']).where(:advance_type=>1)
