@@ -184,7 +184,7 @@ class StaffsController < ApplicationController
 
     while @tcs_id != nil  do
       tcs = TermCourseStudent.find(@tcs_id)
-      @term = Term.where("id=? AND terms.status=3 AND terms.start_date<=? AND terms.end_date >= ?", tcs.term_course.term.id, @today, @today)
+      @term = Term.where("id=? AND terms.status=3 AND terms.grade_start_date<=? AND terms.grade_end_date >= ?", tcs.term_course.term.id, @today, @today)
 
       ## If term is not activate
       if @term.size > 0
