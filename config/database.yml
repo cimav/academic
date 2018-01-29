@@ -7,7 +7,7 @@ development:
   adapter: mysql2
   encoding: utf8
   reconnect: false
-  database: sapos_development
+  database: sapos_production
   pool: 5
   username: root
   password: 
@@ -25,7 +25,7 @@ production:
   adapter: mysql2
   encoding: utf8
   reconnect: false
-  database: 
+  database: sapos_production
   pool: 5
   username:
   password: 
