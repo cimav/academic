@@ -164,7 +164,7 @@ class StaffsController < ApplicationController
     @today  = Date.today
  
     ## r is from relationship
-    @tc_r     = TermCourse.joins(:term).where("term_courses.id=? AND terms.status = 3 AND terms.start_date <= ? AND terms.end_date >= ?", @tc_id, @today, @today)
+    @tc_r     = TermCourse.joins(:term).where("term_courses.id=? AND terms.status = 3 AND terms.grade_start_date <= ? AND terms.grade_end_date >= ?", @tc_id, @today, @today)
     @tc = @tc_r[0]
 
     if @tc_r.size > 0
