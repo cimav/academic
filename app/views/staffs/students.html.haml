@@ -96,7 +96,7 @@
         %th Avances
       - advs.each do |adv|
         - flag = 0
-        - resultset = adv.student.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
+        - resultset = adv.student.term_students.joins(:term).where("terms.grade_start_date<=? and terms.grade_end_date>=?",Date.today,Date.today)
         - resultset.each_with_index do |ts, index|
           - if ts.term.start_date.to_datetime <= adv.advance_date.to_datetime
             - flag = flag + 1
