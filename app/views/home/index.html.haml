@@ -1,26 +1,33 @@
-%h2= "Datos personales"
-%table.table.table-striped
-  %tr
-    %td Numero de empleado:
-    %td.right
-      = @staff.id
-  %tr
-    %td Sexo
-    %td
-      - if @staff.gender=='F'
-        = "Mujer"
-      - if @staff.gender=='H'
-        = "Hombre"
-  %tr
-    %td SNI:
-    %td
-      = @staff.sni
-  %tr
-    %td CVU:
-    %td
-      = @staff.cvu
-  %tr
-    %td Correo Electronico:
-    %td
-      = @staff.email
 
+.row
+  .col-md-9
+    .panel.panel-default
+      .panel-heading Calendario
+      .panel-body
+        %iframe{:frameborder => "0", :height => "600", :scrolling => "no", :src => "https://calendar.google.com/calendar/embed?src=cimav.edu.mx_uemi228msvn0gn5bka7av5c2m4%40group.calendar.google.com&ctz=America%2FMazatlan", :style => "border: 0", :width => "800"}
+
+  .col-md-3
+    .panel.panel-default
+      .panel-heading Datos personales
+      .panel-body
+        %p
+          %b Numero de empleado:
+          = @staff.id
+        %p
+          %b Sexo
+          - if @staff.gender=='F'
+            = "Mujer"
+          - if @staff.gender=='H'
+            = "Hombre"
+          %p
+            %b SNI:
+            = @staff.sni
+          %p
+            %b CVU:
+            -if @staff.blank?
+              = @staff.cvu
+            -else
+              Sin registrar
+          %p
+            %b Correo Electronico:
+            = @staff.email
