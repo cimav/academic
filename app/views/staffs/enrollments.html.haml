@@ -1,5 +1,5 @@
-- @nciclo = '2017-1'
-- @ciclo  = '2016-2'
+- @nciclo = '2018-1'
+- @ciclo  = '2017-2'
 %h3
   ="Inscripciones  "
   ="&nbsp;&nbsp;".html_safe
@@ -12,7 +12,7 @@
     - @students.each do |s|
       - counter = counter + 1
       - ## obtener ultimo ciclo cursado
-      - last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>s.id}).order("terms.end_date desc").limit(1)[0]  rescue ""
+      - last_term  = Term.joins(:term_students=>:student).where(:students=>{:id=>s.id}).order("terms.id desc").limit(1)[0]  rescue ""
       - @e_term_name = last_term.name rescue "Ciclo no disponible"
       %tr
         - access_status = 0
@@ -32,6 +32,7 @@
           .session_block(class="session_style_#{counter}"){:id=>"sblock_#{s.id}"}
             .session-title
               = s.full_name
+              = ts_status
               .session-alert
                 - if access_status.eql? 1
                   %span{:id=>"text_#{s.id}"}= "[Verificar Materias]"
