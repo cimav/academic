@@ -66,8 +66,7 @@
           %td= supervised.program.name
           %td= supervised.campus.name rescue ''
           %td= l supervised.start_date, :format => :short
-          %td= ""
-          =# %td=# l supervised.thesis.defence_date, :format => :short
+          %td= l supervised.thesis.defence_date.to_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
           %td= supervised.staff_co_supervisor.full_name rescue ''
       - @staff.co_supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
@@ -76,8 +75,7 @@
           %td= supervised.program.name
           %td= supervised.campus.name rescue ''
           %td= l supervised.start_date, :format => :short
-          %td= ""
-          =#%td= l supervised.thesis.defence_date, :format => :short
+          %td= l supervised.thesis.defence_date.to_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
           %td= supervised.staff_co_supervisor.full_name rescue ''
 
