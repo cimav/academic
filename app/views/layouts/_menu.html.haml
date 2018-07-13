@@ -1,0 +1,30 @@
+%ul.nav.flex-column.nav-pills.blue
+  %li.nav-item
+    %a.menu.nav-link{:class=> active_class(root_path), :href => "/"}= "  Inicio"
+
+  %li.nav-item{:class => active_class("/horarios")}
+    %a.menu.nav-link{'href' => "/horarios"}= "  Horarios"
+
+  %li.nav-item{:class => active_class("/alumnos")}
+    %a.menu.nav-link{'href' => "/alumnos"}= "  Alumnos"
+
+  %li.nav-item{:class => active_class("/calificaciones")}
+    %a.menu.nav-link{'href' => "/calificaciones"}= "  Calificaciones"
+
+  %li.nav-item#inscripciones-tab{:class => active_class("/inscripciones")}
+    %a.menu.nav-link{'href' => "/inscripciones"}= "  Inscripciones"
+  
+  %li
+    %a.menu.nav-link{'href'=>"/logout"}
+      = "Salir"
+      -#%span
+        -#%i.material-icons{:style=>"font-size:16px;"}="exit_to_app"      
+    
+  - if session[:is_admin]
+    - staff_options = "<option value=\"0\">Ver como:</option>"
+    %li.nav-item
+    - get_all_staffs.each do |staff|
+      - staff_options += "<option value=\"#{staff.id}\">#{staff.full_name}</option>"
+    = select_tag "ver_como", staff_options.html_safe, :onchange => "window.location.replace('/set_user/'+this.value);", :class=>"ver-como", :style =>"width: 100%; margin-top: 4px;"
+
+%p

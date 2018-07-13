@@ -1,0 +1,29 @@
+!!!
+%html
+  %head
+    %title= @page_title || 'Académicos CIMAV'
+    %meta{:name=>"viewport", :content=>"width=device-width, initial-scale=1.0"}
+    %link{:crossorigin => "anonymous", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css", :integrity => "sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm", :rel => "stylesheet"}
+
+    = stylesheet_link_tag  "application"
+    %table#student-schedule
+      %tr
+        %th Hora
+        %th Lunes
+        %th Martes
+        %th Miercoles
+        %th Jueves
+        %th Viernes
+        %th Sabado
+        %th Domingo
+      - (@min_hour..@max_hour).each do |i|
+        %tr
+          %td.hora= "#{i}:00"
+          - (1..7).each do |j|
+            %td.dia
+              - @schedule[i][j].each do |k|
+                .session_block(class="session_style_#{k['n']}")
+                  .session-title
+                    = link_to k['name'], controller: "staffs", action: "show_classroom_students", tc_id: k['tc_id']
+                  .session-staff= k['classroom']
+                  .session-comments= k['comments']
