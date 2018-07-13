@@ -7,7 +7,9 @@ Academic::Application.routes.draw do
   match "/logout" => 'sessions#destroy'
   match '/login' => 'login#index'
 
+  match '/avances' => 'staffs#advances'
   match '/horarios' => 'staffs#schedule_table'
+  match '/horarios/:layout' => 'staffs#schedule_table'
   match '/alumnos' => 'staffs#students'
   match '/alumnos/inscripcion/materias/:id' => 'students#enrollment_courses'
   match '/alumnos/inscripcion/' => 'students#assign_courses'

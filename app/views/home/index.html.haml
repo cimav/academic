@@ -1,33 +1,6 @@
+.col-lg-12
+  .embed-responsive.embed-responsive-1by1
+    %iframe#iframmy.embed-responsive-item{:src => "https://calendar.google.com/calendar/embed?height=400&src=cimav.edu.mx_uemi228msvn0gn5bka7av5c2m4%40group.calendar.google.com&ctz=America%2FMazatlan"}
+  %br
 
-.row
-  .col-md-9
-    .panel.panel-default
-      .panel-heading Calendario
-      .panel-body
-        %iframe{:frameborder => "0", :height => "600", :scrolling => "no", :src => "https://calendar.google.com/calendar/embed?src=cimav.edu.mx_uemi228msvn0gn5bka7av5c2m4%40group.calendar.google.com&ctz=America%2FMazatlan", :style => "border: 0", :width => "800"}
-
-  .col-md-3
-    .panel.panel-default
-      .panel-heading Datos personales
-      .panel-body
-        %p
-          %b Numero de empleado:
-          = @staff.id
-        %p
-          %b Sexo
-          - if @staff.gender=='F'
-            = "Mujer"
-          - if @staff.gender=='H'
-            = "Hombre"
-          %p
-            %b SNI:
-            = @staff.sni
-          %p
-            %b CVU:
-            -if @staff.blank?
-              = @staff.cvu
-            -else
-              Sin registrar
-          %p
-            %b Correo Electronico:
-            = @staff.email
+  

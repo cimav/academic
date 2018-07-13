@@ -1,101 +1,156 @@
-#menu
-  border-right: 1px solid black
-  position: absolute
-  width: 250px
-  left: 0px
-  right: 20px
-  top: 0
-  bottom: 0
-  a.menu
-    color: $blue-strong
-    text-decoration: none
-    left: 10px
-    &:hover 
-      background-color: $light-grey
-
-#menu-bar
-  position: relative
-  width: 200px
-  margin: 0 0 0 auto
-  text-align: right
-    
-#content
-  position: absolute
-  width: 1200px
-  left: 365px
-  right: 200px
-  top: 40px
-  h2 
-    color: $blue-strong
-    font-size: 1.6em
-  h2.centered
-    text-align: center
-  table.data
-    td.left
+#student-schedule
+  margin-top: 20px
+  border-collapse: collapse
+  border: 1px solid $line-color
+  width: 100%
+  tr 
+    th 
+      border: 1px solid $line-color
       font-weight: bold
-      padding-right: 20px
-      width: 30%
-    td.right
-      padding-left: 0px
-      text-align: left
-  table.menu-top
-    td 
       padding: 10px
-    a.menu
-      color: $blue-strong
-      text-decoration: none
-      left: 10px
-      &:hover 
-        background-color: $light-grey
-    a.menu-selected
-      color: $blue-strong
-      font-weight: bold
-      text-decoration: none
-      left: 10px
-      &:hover 
-        background-color: $light-grey
+      border-bottom: 3px solid $grey
+    
+    td
+      vertical-align: top
+      border: 1px solid $line-color
+      &.hora 
+        text-align: center
+        font-size: 90%
+        //width: 2%
+      &.dia
+        text-align: center
+        width: 14%
+        height: 48px
+      .session_block
+        text-align: left
+        margin: 4px
+        padding: 4px
+        border-radius: $radius
+        -moz-border-radius: $radius
+        -webkit-border-radius: $radius
 
-div.add-messages
-  border: 2px solid #EEEEEE
+        font-size: 70%
+        .session-title
+          font-weight: bold
+        .session-comment 
+          white-space: pre
+        .session-staff
+          font-weight: italic
+        
+      .session_style_1  
+        border: 1px solid $sch1-color
+        background-color: $sch1-color
 
-a.a-name
-  font-weight: bolder
+      .session_style_2  
+        border: 1px solid $sch2-color
+        background-color: $sch2-color
 
-.no-close .ui-dialog-titlebar-close
-  display: none
+      .session_style_3  
+        border: 1px solid $sch3-color
+        background-color: $sch3-color
 
-#new-enrollment-dialog
-  #courses
-    height: 390px
-    overflow: auto
-  #buttons
+      .session_style_4  
+        border: 1px solid $sch4-color
+        background-color: $sch4-color
+
+      .session_style_5  
+        border: 1px solid $sch5-color
+        background-color: $sch5-color
+
+      .session_style_6  
+        border: 1px solid $sch6-color
+        background-color: $sch6-color
+
+      .session_style_7  
+        border: 1px solid $sch7-color
+        background-color: $sch7-color
+
+      .session_style_8  
+        border: 1px solid $sch8-color
+        background-color: $sch8-color
+
+      .session_style_9  
+        border: 1px solid $sch9-color
+        background-color: $sch9-color
+
+      .session_style_10  
+        border: 1px solid $sch10-color
+        background-color: $sch10-color
+
+    
+//#59955C <- verde pastel  ** 
+//#324851  <- blue pine (azul pino, verde azuloso) *****
+//#346756   <- pine (verde pino, )  ***
+//#363237  <- deep purple ****
+//#2D4262  <- indigo **
+//#2E2300  <- bark *
+//#304040  <- evergreen *****
+//#52958b  <- lichen **
+//#42313A  <- mahorgany **
+//46211A
+
+.navbar
+  background-color: #304040
+
+.ts-files
+  //float: right
+  a
+    color: #000000
+    cursor: pointer
+  a.hoverini:hover
+    color: #8b8989
+    text-decoration: none
+  .material-icons
+    vertical-align: bottom
+    font-size: 24px
+
+#content
+  margin-top: 100px
+
+.download
+  background-color: #ffffff
+  float: right
+  a
+    color: #c8000a
+
+.img-circle
+  border-radius: 50%
+  vertical-align: middle
+
+.card
+  %h5
+    font-size: 80%
+
+.supervisors
+  font-size: 80%
+
+/***** MEDIA QUERIES ********/
+@media (max-width: 1199.98px)
+  #menu-es-fixed
+    display: none
+  #nbsp
+    display: none
+  .list-group-item
     text-align: center
-    bottom: 300px
-    width: 600px
+  .ts-files
+    .file-group
+      margin-left: auto
+      margin-right: auto
+      float: none
+    .material-icons
+      font-size: 48px
 
-.protocol-head
-  //border: 1px solid black
-  font-size: 16px
-  .label
-    color: black
-    font-weight: bold
-    width: 140px
-    display: inline-block
-  .text
-    color: black
-    font-weight: bold
-    display: inline-block
+@media (min-width: 1200px)
+  #menu-es-fixed
+    display: block
+  #nbsp
+    display: block
+  .list-group-item
+    text-align: left
+  .ts-files
+    float: right
+    .file-group
+      float: left
+    .material-icons
+      font-size: 24px
 
-.questions
-  //border: 1px solid blue
-  color: black
-  font-size: 15px
-  .question
-    font-weight: bold
-  .answer
-    font-weight: normal
-  .button
-    width: 70px
-    height: 30px
-  .messages
-    font-weight: bold

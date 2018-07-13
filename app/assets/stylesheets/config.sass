@@ -1,37 +1,44 @@
+//
+// IMPORTANT: These Sass variables are defined in Bootstrap's variables.scss. You should import that file first, then remove these.
+//
+
+$font-size-base: 1rem
+$font-size-lg: $font-size-base * 1.25
+$font-size-sm: $font-size-base * .875
+$input-height: 2.375rem
+$input-height-sm: 1.9375rem
+$input-height-lg: 3rem
+$input-btn-focus-width: .2rem
+$custom-control-indicator-bg: #dee2e6
+$custom-control-indicator-disabled-bg: #e9ecef
+$custom-control-description-disabled-color: #868e96
+$white: white
+$theme-colors: ('primary': #08d)
+
+// These variables can be used to customize the switch component.
+//
+
+
+$switch-height: calc(#{$input-height} * .8) !default
+$switch-height-sm: calc(#{$input-height-sm} * .8) !default
+$switch-height-lg: calc(#{$input-height-lg} * .8) !default
+$switch-border-radius: $switch-height !default
+$switch-bg: $custom-control-indicator-bg !default
+$switch-checked-bg: map-get($theme-colors, 'primary') !default
+$switch-disabled-bg: $custom-control-indicator-disabled-bg !default
+$switch-disabled-color: $custom-control-description-disabled-color !default
+$switch-thumb-bg: $white !default
+$switch-thumb-border-radius:  50% !default
+$switch-thumb-padding: 2px !default
+$switch-focus-box-shadow: 0 0 0 $input-btn-focus-width rgba(map-get($theme-colors, 'primary'), .25)
+$switch-transition: .2s all !default
+
+// Global configs
 $white: #fff
 $black: #0a0a0a
 $grey: #777
-$light-grey: #eee
-$red: #cc3c29
-$blue-strong: #154c97
 
-$pad: 10px
 $line-color: #ebebeb
-$line2-color: #f0f0f0
-$text-color: #1e1e1e
-$bg-color: #fcfcfc
-$selected-color: #27c
-$hover-color: #efefef
-
-$error-bg: #fbe3e4
-$error-color: #8a1f11
-$error-border-color: #fbc2c4
-
-$notice-bg: #fff6bf
-$notice-color: #514721
-$notice-border-color: #ffd324
-
-$success-bg: #e6efc2
-$success-color: #264409
-$success-border-color: #c6d880
-
-$info-bg: #d5edf8
-$info-color: #205791
-$info-border-color: #92cae4
-
-$button-color: #ddd
-$button-color-light: #fafafa
-$button-text-color: #666
 
 $sch1-color: #bde8b3
 $sch2-color: #a2ded2
@@ -44,3 +51,4 @@ $sch8-color: #c3f3e1
 $sch9-color: #ffad8d
 $sch10-color: #bae1cf
 
+$radius: 5px

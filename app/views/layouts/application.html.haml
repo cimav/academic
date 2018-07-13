@@ -1,90 +1,119 @@
 !!!
-
 %html
   %head
     %title= @page_title || 'Académicos CIMAV'
-    = stylesheet_link_tag "custom-theme/jquery-ui"
-    = stylesheet_link_tag "application"
+    =# csrf_meta_tag
+    -#%meta{:name=>"viewport", :content=>"width=device-width, initial-scale=1.0, shrink-to-fit=no"}
+    %meta{:name=>"viewport", :content=>"width=device-width, initial-scale=1.0"}
+    %link{:crossorigin => "anonymous", :href => "https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css", :integrity => "sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB", :rel => "stylesheet"}
+    %link{:href => "http://fonts.googleapis.com/icon?family=Material+Icons", :rel => "stylesheet"}
+    = stylesheet_link_tag   "application"
 
-
-    - if !@include_css.nil?
-      - @include_css.each do |css|
-        = stylesheet_link_tag css
-    /[if lt IE 8]
-    = javascript_include_tag "application"
-
-
-    - if !@include_js.nil?
-      - @include_js.each do |js|
-        = javascript_include_tag js
-    = csrf_meta_tag
-    %link{:crossorigin => "anonymous", :href => "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css", :integrity => "sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u", :rel => "stylesheet"}/
-
-    /%link{:href => "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css", :rel => "stylesheet"}
-    /%link{:href => "http://fonts.googleapis.com/icon?family=Material+Icons", :rel => "stylesheet"}/
   %body
+    %nav.navbar.navbar-dark.navbar-expand-lg.fixed-top
+      %a.navbar-brand{:href=>"/"}="Académicos CIMAV"
+      %button.navbar-toggler{"type"=>"button", "data-toggle"=>"collapse", "data-target"=>"#navbarTogglerDemo01", "aria-controls"=>"navbarTogglerDemo01", "aria-expanded"=>"false", "aria-label"=>"Toogle Navigation"}
+        %span.navbar-toggler-icon
+      .collapse.navbar-collapse#navbarTogglerDemo01
+        %ul.navbar-nav.mr-auto
+          %li.nav-item#index
+            %a.nav-link{:href=>"/"}="Inicio"
+          %li.nav-item#schedule_table
+            %a.nav-link{:href=>"/horarios"}="Horario"
+          %li.nav-item#students
+            %a.nav-link{:href=>"/alumnos"}="Alumnos"
+          %li.nav-item#advances
+            %a.nav-link{:href=>"/avances"}="Avances"
+          %li.nav-item#grades
+            %a.nav-link{:href=>"/calificaciones"}="Calificaciones"
+          %li.nav-item#enrollments
+            %a.nav-link{:href=>"/inscripciones"}="Inscripciones"
+          
+        %span.navbar-text
+          %span
+            =# @staff.email 
+            =# "&nbsp;".html_safe  
+        %ul.navbar-nav
+          %li.nav-item
+            %a.nav-link{:href=>"/logout"}
+              %span.align-text-top
+                %i.material-icons{:style=>"vertical-align: bottom;"}="exit_to_app"  
+                ="salir"
 
-    %nav.navbar.navbar-default.navbar-fixed-top
-      .container-fluid
-        .navbar-header
-          %button.navbar-toggle.collapsed{"aria-expanded" => "false", "data-target" => "#bs-example-navbar-collapse-1", "data-toggle" => "collapse", :type => "button"}
-            %span.sr-only Toggle navigation
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.navbar-brand{:href => "/"} Académicos CIMAV
-        #bs-example-navbar-collapse-1.collapse.navbar-collapse
-          %ul.nav.navbar-nav
-          %ul.nav.navbar-nav.navbar-right
-            %li
-              %a{:href => "/logout"}
-                %span.glyphicon.glyphicon-log-out
-                salir
+    -#content.container.float-xl-left
+    -#content.container-fluid
+    #content.container
+      .row
+        - if @screen.eql? 'index'
+          .col-lg-3.text-center
+            - if @staff.image_url.equal? nil
+              %div
+                = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/default.jpg",:id => "img-medium-#{@staff.id}", :class=> "img-circle card-img-top", :width=>"200px", :height=>"200px", :alt=>"Buscando imagen...", :align=>"center"
+            - else
+              %div
+                = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url}", :id => "img-medium-#{@staff.id}", :class=> "img-circle icard-img-top", :width=>"200px", :height=>"200px", :alt=>"x", :align=>"center"   
+            %br           
+            %strong= @staff.full_name
+            %br
+            %small= @staff.email
+            %p
+            - if session[:is_admin]
+              - staff_options = "<option value=\"0\">Ver como:</option>"
+              - get_all_staffs.each do |staff|
+                - staff_options += "<option value=\"#{staff.id}\">#{staff.full_name}</option>"
+              = select_tag "ver_como", staff_options.html_safe, :onchange => "window.location.replace('/set_user/'+this.value);", :class=>"ver-como", :style =>"width: 100%; margin-top: 4px;"
+            %p
+            - if @screen.eql? 'index'
+              .card
+                .card-header.text-center= "Datos Personales"
+                .card-body.text-left
+                  %p.card-text
+                    %b Numero de empleado:
+                    = @staff.uh_number    
+                    -#########################    
+                    %br
+                    %b Sexo:
+                    - if @staff.gender=='F'
+                      = "Mujer"
+                    - if @staff.gender=='H'
+                      = "Hombre"
+                    -#########################
+                    %br
+                    %b SNI:
+                    = @staff.sni
+                    -#########################
+                    %br
+                    %b CVU:
+                    -if @staff.blank?
+                      = @staff.cvu
+                    -else
+                      Sin registrar
+              %p
+        - if @screen.eql? 'index'
+          .col-lg-9.text-center
+            = yield
+        - else
+          .col-lg-12.text-center
+            = yield
 
     .container-fluid
-      .row.content
-        .col-md-2.sidebar-nav-fixed
-          .sidebar-nav-fixed.affix
-            %br
-            %br
-            %br
-            %center
-              - if @staff.image_url.equal? nil
-                %div{:style=>"width:200px;height:200px;border: 0px solid #EEEEEE"}
-                  = image_tag "http://posgrado.cimav.edu.mx/assets/staff/fallback/default.jpg",:id => "img-medium-#{@staff.id}", :class=> "img-circle", :width=>"200px", :height=>"200px", :alt=>"Buscando imagen...", :align=>"center"
-              - else
-                %div{:style=>"width:200px;height:200px;border: 0px solid #EEEEEE"}
-                  = image_tag "http://posgrado.cimav.edu.mx/#{@staff.image_url}", :id => "img-medium-#{@staff.id}", :class=> "img-circle", :width=>"200px", :height=>"200px", :alt=>"x", :align=>"center"
-              %br
-              %strong= "#{@staff.first_name} #{@staff.last_name}"
-              %br
-              %br
-            %ul.nav.nav-pills.nav-stacked
-              %li{:class => active_class(root_path)}
-                %a.menu{'href' => "/"}= "  Inicio"
+      #myModal.fade.modal{"tabindex"=>"-1","role"=>"dialog"}
+        .modal-dialog.modal-lg{"role"=>"document"}
+          .modal-content
+            .modal-header
+              %h5.modal-title
+                %span#spanTitle
+              %button.close{"type"=>"button","data-dismiss"=>"modal","aria-label"=>"Close"}
+                %span{"aria-hidden"=>"true"}="&times;".html_safe
+            .modal-body
+              #spanContent.text-justify
+            .modal-footer
+              %button{"data-dismiss"=>"modal"}="Cerrar"
 
-              %li{:class => active_class("/horarios")}
-                %a.menu{'href' => "/horarios"}= "  Horarios"
+    %script{:crossorigin => "anonymous", :src => "https://code.jquery.com/jquery-3.3.1.min.js"}
+    %script{:crossorigin => "anonymous", :src => "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js", :integrity => "sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"}
+    %script{:crossorigin => "anonymous", :src => "https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js", :integrity => "sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"}
 
-              %li{:class => active_class("/alumnos")}
-                %a.menu{'href' => "/alumnos"}= "  Alumnos"
-
-              %li{:class => active_class("/calificaciones")}
-                %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
-
-              %li#inscripciones-tab{:class => active_class("/inscripciones")}
-                %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
-              - if session[:is_admin]
-                - staff_options = "<option value=\"0\">Ver como:</option>"
-                %li
-                - get_all_staffs.each do |staff|
-                  - staff_options += "<option value=\"#{staff.id}\">#{staff.full_name}</option>"
-                = select_tag "ver_como", staff_options.html_safe, :onchange => "window.location.replace('/set_user/'+this.value);", :class=>"ver-como", :style =>"width: 100%; margin-top: 4px;"
-
-        .col-md-10.content
-          .container
-            = yield
-:javascript
-  $(document).ready(function(){
-    $('.ver-como').select2();
-  });
+    :javascript
+      var screen = "#{@screen}"
+    = javascript_include_tag "general"

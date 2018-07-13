@@ -15,7 +15,7 @@ class StaffsController < ApplicationController
     @is_pdf = false
     @id     = params[:staff_id]
     
-    @date   = (Date.today).strftime("%Y-%m-%d")
+    @date = (Date.today).strftime("%Y-%m-%d")
 
     @tcs  = TermCourseSchedule.joins(:term_course=>:term).where("terms.status in (1,2,3) AND term_course_schedules.status=:status AND term_course_schedules.staff_id=:id AND (terms.start_date<=:date AND terms.end_date>=:date)",{:status=>1,:id=>@staff.id,:date=>@date})
 
@@ -74,7 +74,11 @@ class StaffsController < ApplicationController
 
     respond_with do |format|
       format.html do
-        render :layout => true
+        if params[:layout].eql? 'schedule'
+          render :layout=> false, :template=>'staffs/schedule_table_solo'
+        else
+          render :layout => true
+        end
       end
 
       format.pdf do
@@ -110,13 +114,14 @@ class StaffsController < ApplicationController
       @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
     end
 
+    @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
 
     if !@student_advances_files.size.eql? 0
       saf = @student_advances_files[0]
       if !saf.nil? 
         ts = TermStudent.find(saf.term_student_id)
         t  = ts.term
-        advances = Advance.where("advances.student_id=? AND advances.status='C' AND advances.advance_date between ? and ?",ts.student.id,t.start_date,t.end_date).order("advance_date")
+        advances = Advance.where("advances.student_id=?",ts.student.id).order("advance_date")
         @advance = advances[0]
         if !@advance.nil?
           @avg     = get_adv_avg(@advance)
@@ -124,7 +129,8 @@ class StaffsController < ApplicationController
       end
     end
     @screen = "students"
-    @staff  = Staff.find(current_user.id)
+    @staff = Staff.find(current_user.id)
+
     render :layout => false
   end
 
@@ -132,6 +138,11 @@ class StaffsController < ApplicationController
     sf = StudentAdvancesFiles.find(params[:id]).file
     send_file sf.to_s, :x_sendfile=>true
   end 
+
+  def advances
+    @screen="advances"
+    @staff = Staff.find(current_user.id)
+  end
 
   def grades
     @include_js =  ["grades"]
