@@ -1,133 +1,22 @@
-:javascript
-  $(document).ready(function(){
-    function delete_message(a){
-      if(!confirm("¿Seguro que desea eliminar este mensaje?")){return false;}
-      
-      var saf_id     = a.attr("saf_id");
-      var message_id = a.attr("message_id");
-      var id = a.attr("id");
-      var data = $("#create_message_form_"+saf_id).serialize();
-      var url = "/avances/mensajes/"+message_id
-      $.ajax({
-        type: 'DELETE',
-        url: url,
-        data: data,
-        success: function(data){
-          var jq  =  jQuery.parseJSON(data);
-          $("#div-message-"+message_id).remove();
-        },
-        error: function(xhr, textStatus, error){
-           var text = xhr.responseText;
-           try{
-             var jq   = jQuery.parseJSON(xhr.responseText); 
-             alert(text+"|"+jq.flash.error);
-           }
-           catch(e){
-             alert("Error desconocido: "+e.message)
-           }
-        },
-        complete: function(){
-          $("#button_"+saf_id).removeAttr("disabled");
-        }
-      });
-        return false;
-    }
-
-    $(".delete-message").click(function(){delete_message($(this));return false;});
-    $(".show-messages").click(function(){
-      var saf_id = $(this).attr("saf_id");
-      var safma= $("#student_advances_file_messages_add_"+saf_id);
-      if (safma.css("display")=="none"){
-        safma.show();
-        $(this).html("Ocultar mensajes");
-      }else{
-        safma.hide();
-        $(this).html("Mostrar mensajes");
-      }
-      return false;
-    });
-   
-
-    $('.message-button').click(function(){
-      $(this).attr("disabled","disabled");
-      var saf_id = $(this).attr("saf_id");
-      var url    = '/avances/mensajes';
-      var data   = $("#create_message_form_"+saf_id).serialize();
-      $.ajax({
-        type: 'POST',
-        url: url,
-        data: data,
-        success: function(data){
-              var jq  =  jQuery.parseJSON(data);
-              var div = document.createElement("div");
-              var a   = document.createElement("a")
-              var id = jq.flash.id
-              $(a).attr("id","delete-link-"+id)
-              $(a).attr("class","delete-message")
-              $(a).attr("message_id",id)
-              $(a).attr("saf_id",saf_id)
-              $(a).append("Eliminar");
-              $(a).attr("href","#")
-              $(a).click(function(){
-                delete_message($(this));
-                return false;
-              });
-              $(div).attr("id","div-message-"+id)
-              $(div).html("<a class='a-name'>"+$("#hidden_name").val()+"</a> - "+jq.flash.notice+" ");
-              $(div).append(a);
-              $("#div-messages-"+saf_id).append(div);
-
-        },
-        error: function(xhr, textStatus, error){
-           var text = xhr.responseText;
-           var jq   = jQuery.parseJSON(xhr.responseText); 
-           alert(text+"|"+jq.flash.error);
-        },
-        complete: function(){
-          $("#button_"+saf_id).removeAttr("disabled");
-          $("#text_area_"+saf_id).val("");
-        }
-     });
-
-      return false;
-    });
-  });
-
-= "Comentarios del comite tutoral:"
-%br
-- if @advance.nil?
-  = "" 
+- if @advance.status.eql? "C"
+  %b= "Calificación del comite tutoral: "
+  - if @avg.nil?
+    = "N.D."
+  - else
+    = @avg
+  %p
+  %b= "Comentarios del comite tutoral"
+  %br
+  - if @advance.nil?
+    = "Sin Comenarios" 
+  - else
+    = @advance.notes.gsub(/\n/,"<br>").html_safe
 - else
-  %pre= @advance.notes
-%br
-= "Calificación del comite tutoral: "
-- if @avg.nil?
-  = ""
-- else
-  = @avg
+  %b= "Calificación del comite tutoral: "
+  = "N.D."
+  %p
+  %b= "Comentarios del comite tutoral"
+  %br
+  = "N.D." 
+  
 
-- if @student_advances_files.size == 0
-  %div{'id'=>"student_advances_file_zero"}
-    = "No se han subido archivos"
-- else
-  - @student_advances_files.each do |saf|
-    %div{:id=>"student_advances_file_#{saf.id}", :class=>"file_class"}
-      = "#{StudentAdvancesFiles::STUDENT_ADVANCE_TYPE[saf.student_advance_type]}:"
-      %a{'href'=>"/alumno/archivo/#{saf.id}"}= saf.description
-      - if saf.student_advance_type.in? [1,2]
-        = link_to 'Mostrar mensajes', "#", :class => 'show-messages',:id=>"show-messages-#{saf.id}",:saf_id=>saf.id
-      - safms = StudentAdvancesFileMessage.where(:student_advances_file_id=>saf.id)
-      %div{'id'=>"student_advances_file_messages_add_#{saf.id}",'class'=>'add-messages','style'=>"display: none;"}
-        %div{:id=>"div-messages-#{saf.id}"}
-          - safms.each do |safm|
-            %div{:id=>"div-message-#{safm.id}"}
-              %a{:class=>'a-name'}= "#{safm.attachable.first_name} #{safm.attachable.last_name}"
-              = "-"
-              = safm.message
-              - if safm.attachable_type=="Staff" and safm.attachable_id==current_user.id
-                %a{:id=>"delete-link-#{safm.id}",:message_id=>safm.id,:class=>"delete-message",:href=>"#",:saf_id=>saf.id}="Eliminar"
-
-        = form_for(StudentAdvancesFileMessage.new, :remote=>true, :html => { :'data-type' => 'html', :id => "create_message_form_#{saf.id}" }) do |f|
-          = f.hidden_field :student_advances_file_id, {:value => saf.id}
-          = f.text_area :message, :cols=>60, :rows=>3, :id=>"text_area_#{saf.id}"
-          = button_tag "Enviar mensaje", :disable_with => "Enviando..." , :id=>"button_#{saf.id}", :class=>"message-button", :saf_id=>saf.id
