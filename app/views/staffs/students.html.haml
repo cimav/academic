@@ -1,179 +1,188 @@
-=hidden_field_tag :hidden_name, "#{@staff.first_name} #{@staff.last_name}"
--if @staff.supervised.where(:status => Student::ACTIVE).count > 0 || @staff.co_supervised.where(:status => Student::ACTIVE).count > 0
-  %h2 Estudiantes activos
-  %table.formatted-table.students_active
-    %tbody
-      %tr.header
-        %th Nombre
-        %th Programa
-        %th Campus
-        %th Inicio
-        %th Co-Asesor
-        %th Avances
-      - @staff.supervised.where(:status => [Student::ACTIVE,Student::PENROLLMENT]).order("start_date").each_with_index do |supervised, index|    
-        %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
-          %td= supervised.full_name
-          %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
-          %td= l supervised.start_date, :format => :short
-          %td= supervised.staff_co_supervisor.full_name rescue ''
-          - resultset = supervised.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
-          - if resultset.size<=0
+.row
+  .col-lg-12
+    %span.switch.switch
+      %input.switch#students_switch{:type=>"checkbox"}
+      ="Tablas"
+      %label{:for=>"students_switch"}="Tarjetas"
+.row
+  .col-lg-12
+    %br
+    =hidden_field_tag :hidden_name, "#{@staff.first_name} #{@staff.last_name}"
+    %h3= "Estudiantes activos"
+    - students = Student.where(:status => [Student::ACTIVE,Student::PENROLLMENT]).where("supervisor=:staff_id OR co_supervisor=:staff_id",:staff_id=>@staff.id).order("start_date desc")
+    %h5= "(#{students.size})"
+    %br
+.row
+  -if students.size > 0
+    - students.each_with_index do |supervised, index|   
+      .col-lg-4.col-md-6
+        .card.text-left
+          .card-header=supervised.full_name
+          .card-body
+            %p.card-text.supervisors
+              = "Programa: "
+              = supervised.program.name
+              %br
+              = "Campus: "
+              = supervised.campus.name.gsub(/CIMAV /,'') rescue ''
+              %br
+              = "Inicio: "
+              = l supervised.start_date, :format => "%-d %B %Y"
+              %br
+              = "Supervisor: "
+              %b= supervised.staff_supervisor.full_name rescue 'N.D'
+              %br
+              - if !supervised.staff_co_supervisor.nil?
+                = "Co-supervisor: "
+                = supervised.staff_co_supervisor.full_name rescue 'N.D.'
+              - else
+                = "&nbsp;".html_safe
+
+    .table-responsive
+      %table.table.table-bordered.table-sm
+        %tbody
+          %tr.header
+            %th Nombre
+            %th Programa
+            %th Campus
+            %th Inicio
+            %th Supervisores
+        - students.each_with_index do |supervised, index|   
+          %tr.text-left
             %td
-              = "No hay ciclos vigentes"
-          - else
-            - resultset.each_with_index do |ts, index|
-              %td
-                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id, 't_id'=>1 ,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
-              %tr
-                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
-                  = "Buscando archivos..."
-
-      - @staff.co_supervised.where(:status => Student::ACTIVE).order("start_date").each_with_index do |supervised, index|
-        %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
-          %td= supervised.full_name
-          %td= supervised.program.name
-          %td= supervised.campus.name
-          %td= l supervised.start_date, :format => :short
-          %td= supervised.staff_supervisor.full_name rescue ''
-          - resultset = supervised.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
-          - if resultset.size<=0
+              .supervisors= supervised.full_name
             %td
-              = "No hay ciclos vigentes"
-          - else
-            - resultset.each_with_index do |ts, index|
-              %td
-                %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id, 't_id'=>1,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
-              %tr
-                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
-                  = "Buscando archivos..."
+              .supervisors= supervised.program.name
+            %td
+              .supervisors= supervised.campus.name.gsub(/CIMAV /,'') rescue ''
+            %td
+              .supervisors= l supervised.start_date, :format => "%-d %B %Y"
+            %td
+              .supervisors
+                %b= "Director: "
+                = supervised.staff_supervisor.full_name rescue 'N.D'
+                %br
+                - if !supervised.staff_co_supervisor.nil?
+                  %b= "Co-director: "
+                  = supervised.staff_co_supervisor.full_name rescue 'N.D.'
+                - else
+                  = "&nbsp;".html_safe
+      
+.row
+  .col-lg-12
+    %br
+    %h2 Estudiantes graduados
+    - ss  = @staff.supervised.where(:status => Student::GRADUATED).order("start_date desc")
+    - scs = @staff.co_supervised.where(:status => Student::GRADUATED).order("start_date desc")
+    %h5="(#{ss.size+scs.size})"
 
--if @staff.supervised.where(:status => Student::GRADUATED).count > 0 || @staff.co_supervised.where(:status => Student::GRADUATED).count > 0
-  %h2 Estudiantes graduados
-  %table.formatted-table.students_graduated
-    %tbody
-      %tr.header
-        %th Nombre
-        %th Programa
-        %th Campus
-        %th Inicio
-        %th Defensa Tesis
-        %th Asesor
-        %th Co-Asesor
-      - @staff.supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
-        %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
-          %td= supervised.full_name
-          %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
-          %td= l supervised.start_date, :format => :short
-          %td= ""
-          =# %td=# l supervised.thesis.defence_date, :format => :short
-          %td= supervised.staff_supervisor.full_name rescue ''
-          %td= supervised.staff_co_supervisor.full_name rescue ''
-      - @staff.co_supervised.where(:status => Student::GRADUATED).order("start_date").each_with_index do |supervised, index|
-        %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
-          %td= supervised.full_name
-          %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
-          %td= l supervised.start_date, :format => :short
-          %td= ""
-          =#%td= l supervised.thesis.defence_date, :format => :short
-          %td= supervised.staff_supervisor.full_name rescue ''
-          %td= supervised.staff_co_supervisor.full_name rescue ''
+.row
 
-%h2 Avances de comite tutoral
-- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date AND advance_type=1",:id=>current_user.id,:date=>Date.today - 300.days)
-
-- if advs.size == 0 
-  = "No hay avances que mostrar"
-- else 
-  %table.formatted-table.students_active
-    %tbody
-      %tr.header
-        %th Nombre
-        %th Titulo
-        %th Fecha
-        %th Avances
-      - advs.each do |adv|
-        - flag = 0
-        - resultset = adv.student.term_students.joins(:term).where("terms.grade_start_date<=? and terms.grade_end_date>=?",Date.today,Date.today)
-        - resultset.each_with_index do |ts, index|
-          - if ts.term.start_date.to_datetime <= adv.advance_date.to_datetime
-            - flag = flag + 1
-        - if 1 #flag>=1
-          %tr.active-student-item{:id=>"active_advance_#{adv.id}", :advance_id=>adv.id}
-            %td= adv.student.full_name
-            %td= adv.title
-            %td= l adv.advance_date, :format => :long
-            - if resultset.size<=0
-              %td
-                = "No hay ciclos vigentes"
-            - else
-              - resultset.each_with_index do |ts, index|
-                %td
-                  %a{'id'=>"a_#{adv.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>adv.id,'t_id'=>1,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
-                %tr
-                  %td{'id'=>"slider_#{adv.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
-                    = "Buscando archivos..."
-
-%h2 Evaluación de Protocolos
-- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date AND advance_type=2",:id=>current_user.id,:date=>Date.today - 300.days)
-- if advs.size == 0 
-  = "No hay avances que mostrar"
-- else 
-  %table.formatted-table.students_active
-    %tbody
-      %tr.header
-        %th Nombre
-        %th Titulo
-        %th Fecha
-        %th Avances
-      - advs.each do |adv|
-        - flag = 0
-        - resultset = adv.student.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
-        - resultset.each_with_index do |ts, index|
-          - if ts.term.start_date.to_datetime <= adv.advance_date.to_datetime
-            - flag = flag + 1
-        - if 1 #flag>=1
-          %tr.active-student-item{:id=>"active_advance_#{adv.id}", :advance_id=>adv.id}
-            %td= adv.student.full_name
-            %td= adv.title
-            %td= l adv.advance_date, :format => :long
-            - if resultset.size<=0
-              %td
-                = "No hay ciclos vigentes"
-            - else
-              - resultset.each_with_index do |ts, index|
-                %td
-                  %a{'id'=>"a_#{adv.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>adv.id,'t_id'=>2,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
-                %tr
-                  %td{'id'=>"slider_#{adv.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
-                    = "Buscando archivos..."
-
-:javascript
-  $('.ts_files')
-    .click(function(){
-      var id      = $(this).attr("s_id");
-      var type    = $(this).attr("t_id");
-      var adv_id  = $(this).attr("adv_id");
-      var a       = $("#a_"+adv_id+"_"+id);
-      var jqObj   = $("#slider_"+adv_id+"_"+id);
-      var display = jqObj.css("display");
-      if(display=='none'){
-        jqObj.show("slow");
-        a.css("font-weight","bold");
-      }
-      else if(display=='block'){
-        jqObj.hide(1000);
-        a.css("font-weight","normal");
-      }
-      else if(display=='table-cell'){
-        jqObj.hide(1000);
-        a.css("font-weight","normal");
-      }
-      url = '/alumno/archivos/' + id + '/' + type;
-      $.get(url, {}, function(html) {
-        jqObj.html(html);
-      });
-    });
-
+  -if ss.size > 0 || scs.size > 0
+    
+    - ss.each_with_index do |supervised, index|
+      .col-lg-4.col-md-6
+        .card.text-left
+          .card-header=supervised.full_name
+          .card-body
+            %p.card-text.supervisors
+              = "Programa: "
+              = supervised.program.name
+              %br
+              = "Campus: "
+              = supervised.campus.name.gsub(/CIMAV /,'') rescue ''
+              %br
+              = "Inicio: "
+              = l supervised.start_date, :format => "%-d %B %Y"
+              %br
+              =# "Defensa"
+              =# (l supervised.thesis.defence_date, :format => :short) rescue "N.D."
+              = "Supervisor: "
+              %b= supervised.staff_supervisor.full_name rescue 'N.D.'
+              %br
+              - if !supervised.staff_co_supervisor.nil?
+                = "Co-supervisor: "
+                = supervised.staff_co_supervisor.full_name rescue 'N.D.'
+              - else
+                = "&nbsp;".html_safe
+    
+    - scs.each_with_index do |supervised, index|
+      .col-lg-4.col-md-6
+        .card.text-left
+          .card-header=supervised.full_name
+          .card-body
+            %p.card-text.supervisors
+              = "Programa: "
+              = supervised.program.name
+              %br
+              = "Campus: "
+              = supervised.campus.name.gsub(/CIMAV /,'') rescue ''
+              %br
+              = "Inicio: "
+              = l supervised.start_date, :format => "%-d %B %Y"
+              %br
+              =# "Defensa"
+              =# (l supervised.thesis.defence_date, :format => :short) rescue "N.D."
+              = "Supervisor: "
+              = supervised.staff_supervisor.full_name rescue 'N.D.'
+              %br
+              - if !supervised.staff_co_supervisor.nil?
+                = "Co-supervisor: "
+                %b= supervised.staff_co_supervisor.full_name rescue 'N.D.'
+              - else
+                = "&nbsp;".html_safe
+  
+  .table-responsive
+    %table.table.table-bordered.table-sm
+      %tbody
+        %tr.header
+          %th Nombre
+          %th Programa
+          %th Campus
+          %th Inicio
+          -#%th Defensa Tesis
+          %th Asesores
+      - ss.each_with_index do |supervised, index|
+        %tr.text-left
+          %td
+            .supervisors= supervised.full_name
+          %td
+            .supervisors= supervised.program.name
+          %td
+            .supervisors= supervised.campus.name.gsub(/CIMAV /,'') rescue ''
+          %td
+            .supervisors= l supervised.start_date, :format => "%-d %B %Y"
+          -#%td
+            -#.supervised= (l supervised.thesis.defence_date, :format => :short) rescue "N.D."
+          %td
+            .supervisors
+              %b= "Director: "
+              = supervised.staff_supervisor.full_name rescue 'N.D'
+              %br
+              - if !supervised.staff_co_supervisor.nil?
+                %b= "Co-director: "
+                = supervised.staff_co_supervisor.full_name rescue 'N.D.'
+              - else
+                = "&nbsp;".html_safe    
+      - scs.each_with_index do |supervised, index|     
+        %tr.text-left
+          %td
+            .supervisors= supervised.full_name
+          %td
+            .supervisors= supervised.program.name
+          %td
+            .supervisors= supervised.campus.name.gsub(/CIMAV /,'') rescue ''
+          %td
+            .supervisors= l supervised.start_date, :format => "%-d %B %Y"
+          -#%td
+            -#.supervised= (l supervised.thesis.defence_date, :format => :short) rescue "N.D."
+          %td
+            .supervisors
+              %b= "Director: "
+              = supervised.staff_supervisor.full_name rescue 'N.D'
+              %br
+              - if !supervised.staff_co_supervisor.nil?
+                %b= "Co-director: "
+                = supervised.staff_co_supervisor.full_name rescue 'N.D.'
+              - else
+                = "&nbsp;".html_safe      
