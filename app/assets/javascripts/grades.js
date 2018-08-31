@@ -15,7 +15,7 @@ $(document).ready(function(){
       my_id     = $(this).attr('id');
       if(my_id)
       {
-        window.location.href="/calificar/avance/"+my_id
+        window.location.href="/calificar/avance/"+my_id.split("_")[1]
       }
     });//click
 
