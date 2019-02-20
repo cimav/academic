@@ -2,8 +2,8 @@
 class StudentsController < ApplicationController
   before_filter :auth_required
   respond_to :html, :xml, :json
-  $CICLO = "2018-1"
-  $NCICLO = "2018-2"
+  $CICLO = "2018-2"
+  $NCICLO = "2019-1"
 
   def enrollment_courses
     @student   = Student.find(params[:id])
