@@ -23,7 +23,6 @@
     /%link{:href => "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css", :rel => "stylesheet"}
     /%link{:href => "http://fonts.googleapis.com/icon?family=Material+Icons", :rel => "stylesheet"}/
   %body
-
     %nav.navbar.navbar-default.navbar-fixed-top
       .container-fluid
         .navbar-header
@@ -62,18 +61,22 @@
             %ul.nav.nav-pills.nav-stacked
               %li{:class => active_class(root_path)}
                 %a.menu{'href' => "/"}= "  Inicio"
+              - if @staff.staff_type.to_i.eql? 2
+                %li{:class => active_class("/calificaciones")}
+                  %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
+              - else
+                %li{:class => active_class("/horarios")}
+                  %a.menu{'href' => "/horarios"}= "  Horarios"
 
-              %li{:class => active_class("/horarios")}
-                %a.menu{'href' => "/horarios"}= "  Horarios"
+                %li{:class => active_class("/alumnos")}
+                  %a.menu{'href' => "/alumnos"}= "  Alumnos"
 
-              %li{:class => active_class("/alumnos")}
-                %a.menu{'href' => "/alumnos"}= "  Alumnos"
+                %li{:class => active_class("/calificaciones")}
+                  %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
 
-              %li{:class => active_class("/calificaciones")}
-                %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
-
-              %li#inscripciones-tab{:class => active_class("/inscripciones")}
-                %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
+                %li#inscripciones-tab{:class => active_class("/inscripciones")}
+                  %a.menu{'href' => "/inscripciones"}= "  Inscripciones"
+       
               - if session[:is_admin]
                 - staff_options = "<option value=\"0\">Ver como:</option>"
                 %li

@@ -1,66 +1,67 @@
 %h2="Calificaciones"
-%table#student-schedule
-  %caption
-    %h3="Grupos"
-  - counter= 0
-  - if @tc.size > 0
-    - @tc.each do |tc|
-      - counter = counter + 1
+- if !(@staff.staff_type.to_i.eql? 2)
+  %table#student-schedule
+    %caption
+      %h3="Grupos" 
+    - counter= 0
+    - if @tc.size > 0
+      - @tc.each do |tc|
+        - counter = counter + 1
+        %tr
+          %td.dia
+            .session_block(class="session_style_#{counter}")
+              .session-title
+                - if tc.term.status.eql? 3
+                  %a{:href=>"calificar/#{tc.id}"}= tc.course.name
+                - else
+                  = tc.course.name
+              .session-staff= "Grupo #{tc.group}"
+              .session-comments= "Ciclo #{tc.term.name}"
+              .session-comments= "Estatus: #{Term::STATUS[tc.term.status]}"
+        - if counter == 10
+          - counter = 0
+    - else
       %tr
-        %td.dia
-          .session_block(class="session_style_#{counter}")
-            .session-title
-              - if tc.term.status.eql? 3
-                %a{:href=>"calificar/#{tc.id}"}= tc.course.name
-              - else
-                = tc.course.name
-            .session-staff= "Grupo #{tc.group}"
-            .session-comments= "Ciclo #{tc.term.name}"
-            .session-comments= "Estatus: #{Term::STATUS[tc.term.status]}"
-      - if counter == 10
-        - counter = 0
-  - else
-    %tr
-      %td="No hay ciclos activos para calificar"
+        %td="No hay ciclos activos para calificar"
      
 
-%table#student-schedule{:style=>'border:0px;'}
-  %caption
-    %h3="Avances Programáticos"
-  - counter= 0
-  - if @advances.size > 0
-    - @advances.each do |a|
-      - counter = counter + 1
+  %table#student-schedule{:style=>'border:0px;'}
+    %caption
+      %h3="Avances Programáticos"  
+    - counter= 0
+    - if @advances.size > 0
+      - @advances.each do |a|
+        - counter = counter + 1
+        %tr
+          %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
+            .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
+              .session-title
+                %a{:href=>"/calificar/avance/#{a.id}"}= a.student.full_name
+              .session-staff{:id=>"sstaff_#{a.id}"}= "#{a.title}"
+              .session-comments= a.student.program.name
+    - else
       %tr
-        %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
-          .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
-            .session-title
-              %a{:href=>"/calificar/avance/#{a.id}"}= a.student.full_name
-            .session-staff{:id=>"sstaff_#{a.id}"}= "#{a.title}"
-            .session-comments= a.student.program.name
-  - else
-    %tr
-      %td="No hay avances a calificar"
+        %td="No hay avances a calificar"
 
-%table#student-schedule{:style=>'border:0px;'}
-  %caption
-    %h3="Evaluacion de protocolos"
-  - counter= 0
-  - if @protocols.size > 0
-    - @protocols.each do |a|
-      - counter = counter + 1
+  %table#student-schedule{:style=>'border:0px;'}
+    %caption
+      %h3="Evaluacion de protocolos"
+    - counter= 0
+    - if @protocols.size > 0
+      - @protocols.each do |a|
+        - counter = counter + 1
+        %tr
+          %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
+            .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
+              .session-title
+                %a{:href=>"/calificar/avance/#{a.id}"}= a.student.full_name
+              .session-staff{:id=>"sstaff_#{a.id}"}= "#{a.title}"
+              .session-comments= a.student.program.name
+    - else
       %tr
-        %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
-          .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
-            .session-title
-              %a{:href=>"/calificar/avance/#{a.id}"}= a.student.full_name
-            .session-staff{:id=>"sstaff_#{a.id}"}= "#{a.title}"
-            .session-comments= a.student.program.name
-  - else
-    %tr
-      %td="No hay evaluaciones que realizar"
+        %td="No hay evaluaciones que realizar"
 
-%table#student-schedule{:style=>'border:0px;'}
+%table#student-schedule{:style=>'border:0px;'} 
   %caption
     %h3="Evaluacion de seminarios"
   - counter= 0
