@@ -107,7 +107,7 @@ class StaffsController < ApplicationController
     if params[:type].to_i.eql? 2
       @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>3)
     elsif params[:type].to_i.eql? 1
-      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>[1,2])
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>[1,2,3])
     else
       @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
     end
