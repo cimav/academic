@@ -107,11 +107,10 @@ class StaffsController < ApplicationController
     if params[:type].to_i.eql? 2
       @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>3)
     elsif params[:type].to_i.eql? 1
-      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>[1,2])
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>[1,2,3])
     else
       @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
     end
-
 
     if !@student_advances_files.size.eql? 0
       saf = @student_advances_files[0]
@@ -458,6 +457,9 @@ class StaffsController < ApplicationController
     end
 
     if @protocol.save
+      staff = Staff.find(@protocol.staff_id)
+      advance = Advance.find(@protocol.advance_id)
+      create_protocol(@protocol,staff,advance)
       parameters[:grade_status] = @protocol.grade_status
       render_message @protocol,"Protocolo actualizado",parameters
     else
@@ -594,43 +596,58 @@ class StaffsController < ApplicationController
     if advance.advance_type.eql? 2
       pdf_route = "#{filename}/protocol-#{advance.id}-#{staff.id}.pdf"
     elsif advance.advance_type.eql? 3
-      pdf_route = "#{filename}/seminar-#{advance.id}-#{staff.id}.pdf"
+      if protocol.grade_status.eql? 3 # con recomendaciones
+        pdf_route = "#{filename}/seminar-#{advance.id}-#{staff.id}-recom.pdf"
+      else
+        pdf_route = "#{filename}/seminar-#{advance.id}-#{staff.id}.pdf"
+      end
     end
 
     if File.exist?(pdf_route)
       File.delete(pdf_route)
     end
 
-    pdf = Prawn::Document.new(:margin=>[20,43,43,43])
-    size = 14
+    filename = "#{Rails.root.to_s}/private/prawn_templates/membretada.png"
+    pdf      = Prawn::Document.new(:background => filename, :background_scale=>0.36, :margin=>[90,60,60,60] ) 
+
+    pdf.font_families.update(
+          "Montserrat" => { :bold        => Rails.root.join("private/fonts/montserrat/Montserrat-Bold.ttf"),
+                            :italic      => Rails.root.join("private/fonts/montserrat/Montserrat-Italic.ttf"),
+                            :bold_italic => Rails.root.join("private/fonts/montserrat/Montserrat-BoldItalic.ttf"),
+                            :normal      => Rails.root.join("private/fonts/montserrat/Montserrat-Regular.ttf") })
+    pdf.font "Montserrat"
+    pdf.font_size 11
+
+    advance = Advance.find(protocol.advance_id)
 
     if advance.advance_type.eql? 2
-      pdf.move_down 30
-      text = "FORMATO P-MA-E"
-      pdf.text text, :size=>size, :style=> :bold, :align=> :center
+      time = Time.now
+      @consecutivo = get_consecutive(advance.student, time, Certificate::PROTOCOL)
 
-      pdf.move_down 1
-      text = "EVALUACIÓN PROTOCOLOS"
-      pdf.text text ,:size=>size, :style=> :bold, :align=> :center
+      pdf.text "<b>Coordinación de estudios de Posgrado\nFormato P-MA-E-#{time.year}#{@consecutivo}</b>\nChihuahua, Chih., a #{time.day} de #{get_month_name(time.month)} de #{time.year}", :inline_format=>true, :align=>:right
+     
+      text = "\n\nEVALUACIÓN PROTOCOLOS\n\n"
+      pdf.text text , :style=> :bold, :align=> :center
     elsif advance.advance_type.eql? 3
-      pdf.move_down 31
-      text = "SEMINARIO FINAL"
-      pdf.text text ,:size=>size, :style=> :bold, :align=> :center
+      @consecutivo = get_consecutive(advance.student, advance.created_at, Certificate::SEMINAR)
+
+      pdf.text "<b>Coordinación de estudios de Posgrado\nFormato SEM-#{advance.created_at.year}-#{@consecutivo}</b>\nChihuahua, Chih., a #{protocol.created_at.day} de #{get_month_name(protocol.created_at.month)} de #{protocol.created_at.year}", :inline_format=>true, :align=>:right
+      
+      text = "\n\nSEMINARIO FINAL\n\n"
+      pdf.text text , :style=> :bold, :align=> :center
     end
 
-    size = 11
+    size = pdf.font_size
     
-    pdf.move_down 10
     data = []
-    data << [{:content=>"Fecha de Evaluación: #{created}",:colspan=>2,:align=>:right}]
-    data << [{:content=>" ",:colspan=>2}]
-    data << ["Nombre del Alumno:",advance.student.full_name]
-    data << ["Nombre del Director de Tesis:",supervisor_name]
+    data << ["Fecha de Evaluación:", created]
+    data << ["Alumno:",advance.student.full_name]
+    data << ["Director de Tesis:",supervisor_name]
     data << ["Departamento:",supervisor_area]
     data << ["Programa:",advance.student.program.name]
     data << ["Título de la Tesis:",advance.title]
 
-    tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[165,365])
+    tabla = pdf.make_table(data,:width=>500,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[150,350])
     tabla.draw
     
     pdf.move_down 10
@@ -640,13 +657,14 @@ class StaffsController < ApplicationController
     content1   = icon_empty
 
     protocol.reload.answers.each do |a|
-      pdf.move_down 10
       question = Question.find(a.question_id)
       text     = question.question rescue "N.D"
-      pdf.text text, :size=>size, :style=>:bold
-
+    
+      column_widths = [400,100]
       data = []
       if question.question_type.to_i.eql? 1  ## multiple option
+        column_widths = [30,470]
+        pdf.text text, :size=>size, :style=>:bold
         (a.answer.eql? 4) ? content1 = icon_ok : content1 = icon_empty
         data << [content1,"Excelente"]
         (a.answer.eql? 3) ? content1 = icon_ok : content1 = icon_empty
@@ -655,20 +673,22 @@ class StaffsController < ApplicationController
         data << [content1,"Regular"]
         (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
         data << [content1,"Deficiente"]
-      elsif question.question_type.to_i.eql? 2 ## text
-        answer = a.comments rescue "n.d."
+      elsif question.question_type.to_i.eql? 2 ## text (recomendaciones y comentarios)
+        answer = a.comments.blank? ? "N.A." : a.comments
+        data << [{:content=>"\n<b>#{text}:</b>",:colspan=>2}]
         data << [{:content=>"#{answer}",:colspan=>2}]
       elsif question.question_type.to_i.eql? 3 ## grade
         answer = a.answer rescue "n.d."
-        data << [{:content=>"#{answer}",:colspan=>2}]
+        data << [text,"<b>#{answer}</b>"]
       end
-        tabla = pdf.make_table(data,:width=>530,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>[30,500])
-        tabla.draw
+ 
+      tabla = pdf.make_table(data,:width=>500,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:center,:column_widths=>column_widths)
+      tabla.draw
     end  ## end protocol.answeers
 
     pdf.move_down 10
     data = []
-    data << [{:content=>"<b>Resultado</b>",:colspan=>2}]
+    data << [{:content=>"<b>Resultado:</b>",:colspan=>2}]
     
     icon_empty = pdf.table_icon('fa-square-o')
     icon_ok    = pdf.table_icon('fa-check-square-o')
@@ -688,10 +708,30 @@ class StaffsController < ApplicationController
       data << [content1,"Con Recomendaciones"]
     end
       
-    tabla = pdf.make_table(data,:width=>300,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:left,:column_widths=>[30,270])
+    tabla = pdf.make_table(data,:width=>320,:cell_style=>{:size=>size,:padding=>2,:inline_format => true,:border_width=>0},:position=>:left,:column_widths=>[30,290])
     tabla.draw
 
-    pdf.text "\nCon promedio de #{protocol.grade}"
+    unless advance.advance_type.eql? 2
+      pdf.text "\nCon promedio de <b>#{protocol.grade}</b>", :inline_format=>true
+    end
+
+    pdf.font_size 8
+    info = "Este documento fue emitido a traves del sistema de posgrado"
+    pdf.bounding_box [pdf.bounds.left, pdf.bounds.bottom + 15], :width  => pdf.bounds.width do
+      pdf.text info, :size => pdf.font_size, :align=>:left
+    end
+
+=begin
+    pdf.repeat :all do
+      # footer
+      pdf.bounding_box [pdf.bounds.left, pdf.bounds.bottom + 15], :width  => pdf.bounds.width do
+        pdf.move_down 5
+        pdf.text info, :size => pdf.font_size, :align=>:left
+      end
+    end
+=end
+    
+    pdf.number_pages "Página <page> de <total>", :at=>[pdf.bounds.left , pdf.bounds.bottom], :align=>:right, :size=>pdf.font_size,:inline_format=>true
 
     pdf.render_file "#{pdf_route}"
   end
@@ -717,6 +757,26 @@ class StaffsController < ApplicationController
     end
 
     @email.save
+  end
+
+  def get_consecutive(object, time, type)
+    maximum = Certificate.where(:year => time.year,:type_id=>type).maximum("consecutive")
+
+    if maximum.nil?
+      maximum = 1
+    else
+      maximum = maximum + 1
+    end
+
+    certificate                 = Certificate.new()
+    certificate.consecutive     = maximum
+    certificate.year            = time.year
+    certificate.attachable_id   = object.id
+    certificate.attachable_type = object.class.to_s
+    certificate.type_id         = type
+    certificate.save
+
+    return "%03d" % maximum
   end
   
   def set_advance_grades_token
