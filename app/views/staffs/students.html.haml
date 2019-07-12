@@ -94,7 +94,7 @@
         %th Avances
       - advs.each do |adv|
         - flag = 0
-        - resultset = adv.student.term_students.joins(:term).where("terms.grade_start_date<=? and terms.grade_end_date>=?",Date.today,Date.today)
+        - resultset = adv.student.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
         - resultset.each_with_index do |ts, index|
           - if ts.term.start_date.to_datetime <= adv.advance_date.to_datetime
             - flag = flag + 1
@@ -115,7 +115,8 @@
                     = "Buscando archivos..."
 
 %h2 Evaluación de Protocolos
-- advs = Advance.where("(tutor1=:id or tutor2=:id or tutor3=:id or tutor4=:id or tutor5=:id) and advances.status='P' and advance_date>=:date AND advance_type=2",:id=>current_user.id,:date=>Date.today - 300.days)
+- advs = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND terms.status in (1,2,3) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id) and advances.status in (:status) AND students.status in (:student_status)",:id=>@staff.id,:level=>[1,2],:status=>['P','C'],:student_status=>[1,6]).where(:advance_type=>2)
+
 - if advs.size == 0 
   = "No hay avances que mostrar"
 - else 
