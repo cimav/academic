@@ -33,7 +33,7 @@
       - @advances.each do |a|
         - counter = counter + 1
         %tr
-          %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
+          %td.dia{:style=>'cursor:pointer;border:0px',:id=>"advance_#{a.id}"}
             .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
               .session-title
                 %a{:href=>"/calificar/avance/#{a.id}"}= a.student.full_name
@@ -51,7 +51,7 @@
       - @protocols.each do |a|
         - counter = counter + 1
         %tr
-          %td.dia{:style=>'cursor:pointer;border:0px',:id=>a.id}
+          %td.dia{:style=>'cursor:pointer;border:0px',:id=>"evaluacion_#{a.id}"}
             .session_block(class="session_style_#{counter}"){:id=>"sblock_#{a.id}"}
               .session-title
                 %a{:href=>"/calificar/avance/#{a.id}"}= a.student.full_name

@@ -2,21 +2,25 @@ $(document).ready(function(){
   $(".dia")
     .hover( function() {
         var my_id = $(this).attr('id')
+        array     = my_id.split("_")
+        my_id     = array[1]
         $("#sblock_"+my_id).css("background-color","white");
         $("#sstaff_"+my_id).css("background-color","white");
       },
             function() { 
         var my_id = $(this).attr('id')
+        array     = my_id.split("_")
+        my_id     = array[1]
         $("#sblock_"+my_id).removeAttr("style");
         $("#sstaff_"+my_id).removeAttr("style");
       }
     )//hover
     .click(function(){
       my_id     = $(this).attr('id');
-      if(my_id)
-      {
-        window.location.href="/calificar/avance/"+my_id
-      }
+      array     = my_id.split("_")
+      my_id     = array[1]
+
+      window.location.href="/calificar/avance/"+my_id
     });//click
 
   $("#advance-grades-form")
