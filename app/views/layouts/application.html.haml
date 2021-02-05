@@ -64,6 +64,8 @@
               - if @staff.staff_type.to_i.eql? 2
                 %li{:class => active_class("/calificaciones")}
                   %a.menu{'href' => "/calificaciones"}= "  Calificaciones"
+                %li{:class => active_class("/alumnos")}
+                  %a.menu{'href' => "/alumnos"}= "  Alumnos"
               - else
                 %li{:class => active_class("/horarios")}
                   %a.menu{'href' => "/horarios"}= "  Horarios"

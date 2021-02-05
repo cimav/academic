@@ -57,7 +57,11 @@ class StaffsController < ApplicationController
         end
 
         staff_name = session_item.staff.full_name rescue 'Sin docente'
-
+	puts "staff_anme  => #{staff_name}"
+	puts "sesseion => #{session_item}"
+	puts "session2 => #{session_item.term_course.course}"
+	 puts "session3 => #{session_item.term_course.course.name}"
+	puts "sid => #{session_item.id} - #{session_item.classroom}"
         details = {
           "name"         => session_item.term_course.course.name,
           "staff_name"   => staff_name,
@@ -105,11 +109,11 @@ class StaffsController < ApplicationController
     @term_student =  TermStudent.find(params[:id])
 
     if params[:type].to_i.eql? 2
-      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>3)
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>3).order("id desc")
     elsif params[:type].to_i.eql? 1
-      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>[1,2,3])
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id],:student_advance_type=>[1,2,3]).order("id desc")
     else
-      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id])
+      @student_advances_files = StudentAdvancesFiles.where(:term_student_id=>params[:id]).order("id desc")
     end
 
     if !@student_advances_files.size.eql? 0
@@ -409,7 +413,7 @@ class StaffsController < ApplicationController
         end ## params.each do ...
         
         if @advance.advance_type.eql? 3 # seminar
-          avg = sum/counter
+          avg = sum.to_f / counter
  
           if !@protocol.status.to_i.eql? 4
             if reprobate
@@ -673,6 +677,11 @@ class StaffsController < ApplicationController
         data << [content1,"Regular"]
         (a.answer.eql? 1) ? content1 = icon_ok : content1 = icon_empty
         data << [content1,"Deficiente"]
+
+        if !a.comments.blank?
+          data << [{:content=>"#{a.comments}\n",:colspan=>2}] 
+	end
+
       elsif question.question_type.to_i.eql? 2 ## text (recomendaciones y comentarios)
         answer = a.comments.blank? ? "N.A." : a.comments
         data << [{:content=>"\n<b>#{text}:</b>",:colspan=>2}]

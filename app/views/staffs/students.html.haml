@@ -8,14 +8,16 @@
         %th Programa
         %th Campus
         %th Inicio
+        %th Asesor
         %th Co-Asesor
         %th Avances
       - @staff.supervised.where(:status => [Student::ACTIVE,Student::PENROLLMENT]).order("start_date").each_with_index do |supervised, index|    
         %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
           %td= supervised.full_name
           %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
+          %td= supervised.campus.short_name rescue ''
           %td= l supervised.start_date, :format => :short
+          %td= supervised.staff_supervisor.full_name rescue ''
           %td= supervised.staff_co_supervisor.full_name rescue ''
           - resultset = supervised.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
           - if resultset.size<=0
@@ -26,16 +28,17 @@
               %td
                 %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id, 't_id'=>1 ,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
               %tr
-                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
+                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"7"}
                   = "Buscando archivos..."
 
       - @staff.co_supervised.where(:status => Student::ACTIVE).order("start_date").each_with_index do |supervised, index|
         %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
           %td= supervised.full_name
           %td= supervised.program.name
-          %td= supervised.campus.name
+          %td= supervised.campus.short_name
           %td= l supervised.start_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
+          %td= supervised.staff_co_supervisor.full_name rescue ''
           - resultset = supervised.term_students.joins(:term).where("terms.start_date<=? and terms.end_date>=?",Date.today,Date.today)
           - if resultset.size<=0
             %td
@@ -45,7 +48,7 @@
               %td
                 %a{'id'=>"a_#{supervised.id}_#{ts.id}",'s_id'=>ts.id, 't_id'=>1,:adv_id=>supervised.id,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
               %tr
-                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
+                %td{'id'=>"slider_#{supervised.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"7"}
                   = "Buscando archivos..."
 
 -if @staff.supervised.where(:status => Student::GRADUATED).count > 0 || @staff.co_supervised.where(:status => Student::GRADUATED).count > 0
@@ -64,7 +67,7 @@
         %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
           %td= supervised.full_name
           %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
+          %td= supervised.campus.short_name rescue ''
           %td= l supervised.start_date, :format => :short
           %td= l supervised.thesis.defence_date.to_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
@@ -73,7 +76,7 @@
         %tr.active-student-item{:id=>"active_student_#{supervised.id}", :student_id=>supervised.id}
           %td= supervised.full_name
           %td= supervised.program.name
-          %td= supervised.campus.name rescue ''
+          %td= supervised.campus.short_name rescue ''
           %td= l supervised.start_date, :format => :short
           %td= l supervised.thesis.defence_date.to_date, :format => :short
           %td= supervised.staff_supervisor.full_name rescue ''
@@ -111,11 +114,11 @@
                 %td
                   %a{'id'=>"a_#{adv.id}_#{ts.id}",'s_id'=>ts.id,:adv_id=>adv.id,'t_id'=>1,'class'=>'ts_files','style'=>'cursor:pointer;'}= ts.term.name 
                 %tr
-                  %td{'id'=>"slider_#{adv.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"6"}
+                  %td{'id'=>"slider_#{adv.id}_#{ts.id}",'style'=>'display:none;',"colspan"=>"7"}
                     = "Buscando archivos..."
 
 %h2 Evaluación de Protocolos
-- advs = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.grade_start_date and terms.grade_end_date) AND terms.status in (1,2,3) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id) and advances.status in (:status) AND students.status in (:student_status)",:id=>@staff.id,:level=>[1,2],:status=>['P','C'],:student_status=>[1,6]).where(:advance_type=>2)
+- advs = Advance.select("distinct advances.*").joins(:student=>:program).joins(:student=>{:term_students=>:term}).where("(curdate() between terms.start_date and terms.end_date) AND terms.status in (1,2,3) AND programs.level in (:level) AND (tutor1=:id OR tutor2=:id OR tutor3=:id OR tutor4=:id OR tutor5=:id) and advances.status in (:status) AND students.status in (:student_status)",:id=>@staff.id,:level=>[1,2],:status=>['P','C'],:student_status=>[1,6]).where(:advance_type=>2)
 
 - if advs.size == 0 
   = "No hay avances que mostrar"
